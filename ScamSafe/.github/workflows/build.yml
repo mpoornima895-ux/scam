@@ -1,0 +1,25 @@
+name: Build APK
+on:
+  push:
+    branches: [main]
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { java-version: '17', distribution: 'temurin' }
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: npm install
+      - uses: android-actions/setup-android@v3
+      - run: npx expo prebuild --platform android --clean
+      - run: chmod +x android/gradlew
+      - run: cd android && ./gradlew assembleRelease --no-daemon
+        env:
+          ANDROID_HOME: ${{ env.ANDROID_SDK_ROOT }}
+          GRADLE_OPTS: "-Dorg.gradle.daemon=false -Xmx3g"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ScamSafe-APK
+          path: android/app/build/outputs/apk/release/app-release.apk

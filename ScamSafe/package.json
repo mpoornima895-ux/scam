@@ -1,0 +1,23 @@
+{
+  "name": "scamsafe",
+  "version": "1.0.0",
+  "private": true,
+  "main": "index.ts",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo run:android",
+    "prebuild": "expo prebuild --platform android --clean"
+  },
+  "dependencies": {
+    "@react-native-async-storage/async-storage": "2.2.0",
+    "expo": "~57.0.21",
+    "expo-modules-core": "~57.0.15",
+    "react": "19.2.0",
+    "react-native": "0.86.0",
+    "sms-reader": "file:./modules/sms-reader"
+  },
+  "devDependencies": {
+    "@types/react": "~19.2.2",
+    "typescript": "~5.9.2"
+  }
+}
