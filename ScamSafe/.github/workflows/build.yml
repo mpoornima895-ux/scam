@@ -11,7 +11,7 @@ jobs:
         with: { java-version: '17', distribution: 'temurin' }
       - uses: actions/setup-node@v4
         with: { node-version: '20' }
-      - run: npm install
+      - run: npm install --legacy-peer-deps
       - uses: android-actions/setup-android@v3
       - run: npx expo prebuild --platform android --clean
       - run: chmod +x android/gradlew
