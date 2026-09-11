@@ -5,6 +5,9 @@ on:
 jobs:
   apk:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ScamSafe
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -22,4 +25,4 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: ScamSafe-APK
-          path: android/app/build/outputs/apk/release/app-release.apk
+          path: ScamSafe/android/app/build/outputs/apk/release/app-release.apk
