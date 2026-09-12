@@ -15,16 +15,14 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: '20' }
       - run: npm install --legacy-peer-deps
-      - run: npm install --save-dev @react-native-community/cli @react-native/metro-config --legacy-peer-deps
       - uses: android-actions/setup-android@v3
       - run: npx expo prebuild --platform android --clean
-      - run: mkdir -p android/app/src/main/assets
-      - run: npx react-native bundle --platform android --dev false --entry-file index.ts --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res
       - run: chmod +x android/gradlew
       - run: cd android && ./gradlew assembleDebug --no-daemon
         env:
           ANDROID_HOME: ${{ env.ANDROID_SDK_ROOT }}
           GRADLE_OPTS: "-Dorg.gradle.daemon=false -Xmx3g"
+          NODE_ENV: production
       - uses: actions/upload-artifact@v4
         with:
           name: ScamSafe-APK
