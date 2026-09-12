@@ -15,7 +15,7 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: '20' }
       - run: npm install --legacy-peer-deps
-      - run: npm install --save-dev @react-native-community/cli --legacy-peer-deps
+      - run: npm install --save-dev @react-native-community/cli @react-native/metro-config --legacy-peer-deps
       - uses: android-actions/setup-android@v3
       - run: npx expo prebuild --platform android --clean
       - run: mkdir -p android/app/src/main/assets
