@@ -17,6 +17,8 @@ jobs:
       - run: npm install --legacy-peer-deps
       - uses: android-actions/setup-android@v3
       - run: npx expo prebuild --platform android --clean
+      - run: mkdir -p android/app/src/main/assets
+      - run: npx react-native bundle --platform android --dev false --entry-file index.ts --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res
       - run: chmod +x android/gradlew
       - run: cd android && ./gradlew assembleDebug --no-daemon
         env:
