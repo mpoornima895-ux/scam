@@ -15,9 +15,14 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: '20' }
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+        uses: reactivecircus/android-emulator-runner@v2
+        continue-on-error: true
         with:
-          cmdline-tools-version: 11076708
+          api-level: 29
+          script: echo "SDK ready"
+      - name: Install NDK and build tools
+        run: |
+          echo "y" | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager "build-tools;34.0.0" "platforms;android-34" "ndk;27.1.12297006" || true
       - run: npm install --legacy-peer-deps
       - run: npx expo prebuild --platform android --clean
       - run: chmod +x android/gradlew
