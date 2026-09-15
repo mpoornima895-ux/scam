@@ -22,7 +22,7 @@ jobs:
         env:
           ANDROID_HOME: ${{ env.ANDROID_SDK_ROOT }}
           GRADLE_OPTS: "-Dorg.gradle.daemon=false -Xmx3g"
-          NODE_ENV: production
+          BUNDLE_IN_DEBUG: true
       - uses: actions/upload-artifact@v4
         with:
           name: ScamSafe-APK
