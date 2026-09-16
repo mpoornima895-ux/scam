@@ -21,10 +21,15 @@ jobs:
           echo "ANDROID_SDK_ROOT=/usr/local/lib/android/sdk" >> $GITHUB_ENV
           echo "/usr/local/lib/android/sdk/platform-tools" >> $GITHUB_PATH
       - run: npx expo prebuild --platform android --clean
-      - name: Force bundleInDebug
+      - name: Create JS bundle manually
         run: |
-          sed -i '/^react {/a\    bundleInDebug = true' android/app/build.gradle || true
-          grep -A3 "^react" android/app/build.gradle || true
+          mkdir -p android/app/src/main/assets
+          npx expo export:embed \
+            --platform android \
+            --entry-file index.ts \
+            --bundle-output android/app/src/main/assets/index.android.bundle \
+            --assets-dest android/app/src/main/res \
+            --dev false
       - run: chmod +x android/gradlew
       - run: cd android && ./gradlew assembleDebug --no-daemon
         env:
