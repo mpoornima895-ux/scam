@@ -15,20 +15,21 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: '20' }
       - run: npm install --legacy-peer-deps
-      - uses: android-actions/setup-android@v3
-        with:
-          cmdline-tools-version: 11076708
-      - run: npx expo prebuild --platform android --clean
-      - name: Force JS bundle in debug build
+      - name: Set ANDROID_HOME
         run: |
-          sed -i 's/react {/react {\n        bundleInDebug = true/' android/app/build.gradle
-          grep -A2 "react {" android/app/build.gradle
+          echo "ANDROID_HOME=/usr/local/lib/android/sdk" >> $GITHUB_ENV
+          echo "ANDROID_SDK_ROOT=/usr/local/lib/android/sdk" >> $GITHUB_ENV
+          echo "/usr/local/lib/android/sdk/platform-tools" >> $GITHUB_PATH
+      - run: npx expo prebuild --platform android --clean
+      - name: Force bundleInDebug
+        run: |
+          sed -i '/^react {/a\    bundleInDebug = true' android/app/build.gradle || true
+          grep -A3 "^react" android/app/build.gradle || true
       - run: chmod +x android/gradlew
       - run: cd android && ./gradlew assembleDebug --no-daemon
         env:
-          ANDROID_HOME: ${{ env.ANDROID_SDK_ROOT }}
           GRADLE_OPTS: "-Dorg.gradle.daemon=false -Xmx3g"
-      - name: Verify APK exists
+      - name: Verify APK
         run: ls -la android/app/build/outputs/apk/debug/
       - uses: actions/upload-artifact@v4
         with:
