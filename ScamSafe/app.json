@@ -7,6 +7,11 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
     "platforms": ["android"],
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#050508"
+    },
     "android": {
       "package": "com.anonymous.ScamSafe",
       "permissions": ["android.permission.READ_SMS", "android.permission.RECEIVE_SMS"],
@@ -14,13 +19,6 @@
         "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#050508"
       }
-    },
-    "splash": {
-      "image": "./assets/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#050508"
     }
   }
 }
- 
- 
