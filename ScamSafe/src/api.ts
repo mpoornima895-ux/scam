@@ -9,7 +9,7 @@ export type ApiResult = {
   if_already_sent?: string;
 };
 
-const API_URL = 'https://upi-fraud-detector-10.vercel.app/api/check';
+const API_URL = 'https://scamsafe-backend.vercel.app/api/check';
 
 export async function analyzeMessage(message: string): Promise<ApiResult | null> {
   try {
@@ -22,7 +22,7 @@ export async function analyzeMessage(message: string): Promise<ApiResult | null>
         'Content-Type': 'application/json',
         Accept: 'application/json'
       },
-      body: JSON.stringify({ message }),
+      body: JSON.stringify({ text: message }),
       signal: controller.signal
     });
 
