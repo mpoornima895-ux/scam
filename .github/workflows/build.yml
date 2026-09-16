@@ -14,23 +14,22 @@ jobs:
         with: { java-version: '17', distribution: 'temurin' }
       - uses: actions/setup-node@v4
         with: { node-version: '20' }
-      - name: Setup Android SDK
-        uses: reactivecircus/android-emulator-runner@v2
-        continue-on-error: true
-        with:
-          api-level: 29
-          script: echo "SDK ready"
-      - name: Install NDK and build tools
-        run: |
-          echo "y" | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager "build-tools;34.0.0" "platforms;android-34" "ndk;27.1.12297006" || true
       - run: npm install --legacy-peer-deps
+      - uses: android-actions/setup-android@v3
+        with:
+          cmdline-tools-version: 11076708
       - run: npx expo prebuild --platform android --clean
+      - name: Force JS bundle in debug build
+        run: |
+          sed -i 's/react {/react {\n        bundleInDebug = true/' android/app/build.gradle
+          grep -A2 "react {" android/app/build.gradle
       - run: chmod +x android/gradlew
       - run: cd android && ./gradlew assembleDebug --no-daemon
         env:
           ANDROID_HOME: ${{ env.ANDROID_SDK_ROOT }}
           GRADLE_OPTS: "-Dorg.gradle.daemon=false -Xmx3g"
-          BUNDLE_IN_DEBUG: true
+      - name: Verify APK exists
+        run: ls -la android/app/build/outputs/apk/debug/
       - uses: actions/upload-artifact@v4
         with:
           name: ScamSafe-APK
