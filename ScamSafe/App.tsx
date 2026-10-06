@@ -72,6 +72,9 @@ function App(): React.JSX.Element {
   const [scanLoading, setScanLoading] = useState<boolean>(false);
   const [scanTotal, setScanTotal] = useState<number>(0);
   const [scanDone, setScanDone] = useState<number>(0);
+  const [scanDetected, setScanDetected] = useState<number>(0);
+  const [scanComplete, setScanComplete] = useState<boolean>(false);
+  const [lastScanSummary, setLastScanSummary] = useState<{ total: number; threats: number; medium: number; safe: number } | null>(null);
   const [autoNote, setAutoNote] = useState<string>('Idle');
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
@@ -322,10 +325,15 @@ function App(): React.JSX.Element {
       }
 
       setScanLoading(true);
+      setScanComplete(false);
+      setLastScanSummary(null);
       setScanTotal(recentMessages.length);
       setScanDone(0);
+      setScanDetected(0);
 
       let dontClickCount = 0;
+      let mediumCount = 0;
+      let safeCount = 0;
 
       for (let index = 0; index < recentMessages.length; index += 1) {
         const message = recentMessages[index];
@@ -339,6 +347,11 @@ function App(): React.JSX.Element {
             setEntries(next);
             if (isDontClick(entry)) {
               dontClickCount += 1;
+              setScanDetected(prev => prev + 1);
+            } else if (result.risk_level === 'Medium') {
+              mediumCount += 1;
+            } else {
+              safeCount += 1;
             }
           }
         } catch {
@@ -348,7 +361,13 @@ function App(): React.JSX.Element {
       }
 
       lastAutoScanAtRef.current = Date.now();
-      Alert.alert('✅ Scan Complete', `${recentMessages.length} messages\n🚫 ${dontClickCount} don't-click`);
+      setScanComplete(true);
+      setLastScanSummary({
+        total: recentMessages.length,
+        threats: dontClickCount,
+        medium: mediumCount,
+        safe: safeCount,
+      });
     } catch {
       Alert.alert('Scan failed', 'Something went wrong during message analysis.');
     } finally {
@@ -537,7 +556,47 @@ function App(): React.JSX.Element {
               <View style={styles.progressTrack}>
                 <View style={[styles.progressFill, { width: `${progressPercent}%` }]} />
               </View>
-              <Text style={styles.progressText}>Analyzing {scanDone} of {scanTotal} messages...</Text>
+              <Text style={styles.progressText}>Scanning {scanDone} of {scanTotal} messages...</Text>
+              <View style={styles.scanStatsRow}>
+                <View style={styles.scanStatItem}>
+                  <Text style={styles.scanStatNumber}>{scanDone}</Text>
+                  <Text style={styles.scanStatLabel}>Scanned</Text>
+                </View>
+                <View style={styles.scanStatDivider} />
+                <View style={styles.scanStatItem}>
+                  <Text style={[styles.scanStatNumber, { color: '#fca5a5' }]}>{scanDetected}</Text>
+                  <Text style={styles.scanStatLabel}>Threats</Text>
+                </View>
+                <View style={styles.scanStatDivider} />
+                <View style={styles.scanStatItem}>
+                  <Text style={[styles.scanStatNumber, { color: '#6ee7b7' }]}>{scanDone - scanDetected}</Text>
+                  <Text style={styles.scanStatLabel}>Safe</Text>
+                </View>
+              </View>
+            </View>
+          ) : null}
+
+          {scanComplete && lastScanSummary ? (
+            <View style={styles.summaryPanel}>
+              <Text style={styles.summaryTitle}>✅ Scan Complete</Text>
+              <Text style={styles.summarySub}>{lastScanSummary.total} messages sent to AI for review</Text>
+              <View style={styles.summaryGrid}>
+                <View style={[styles.summaryCard, { borderColor: 'rgba(239,68,68,0.5)' }]}>
+                  <Text style={[styles.summaryCardNumber, { color: '#fca5a5' }]}>🚫 {lastScanSummary.threats}</Text>
+                  <Text style={styles.summaryCardLabel}>Don't Click</Text>
+                </View>
+                <View style={[styles.summaryCard, { borderColor: 'rgba(245,158,11,0.5)' }]}>
+                  <Text style={[styles.summaryCardNumber, { color: '#fcd34d' }]}>⚠ {lastScanSummary.medium}</Text>
+                  <Text style={styles.summaryCardLabel}>Suspicious</Text>
+                </View>
+                <View style={[styles.summaryCard, { borderColor: 'rgba(16,185,129,0.5)' }]}>
+                  <Text style={[styles.summaryCardNumber, { color: '#6ee7b7' }]}>✓ {lastScanSummary.safe}</Text>
+                  <Text style={styles.summaryCardLabel}>Safe</Text>
+                </View>
+              </View>
+              <Pressable style={styles.viewHistoryBtn} onPress={() => setTab('history')}>
+                <Text style={styles.viewHistoryText}>View Full History →</Text>
+              </Pressable>
             </View>
           ) : null}
 
@@ -586,11 +645,24 @@ function App(): React.JSX.Element {
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.listContent}
           ListHeaderComponent={entries.length > 0 ? (
-            <View style={styles.historyHeader}>
-              <Text style={styles.historyHeaderText}>{entries.length} saved results</Text>
-              <Pressable onPress={onClearHistory}>
-                <Text style={styles.clearText}>Clear all</Text>
-              </Pressable>
+            <View>
+              <View style={styles.historyHeader}>
+                <Text style={styles.historyHeaderText}>{entries.length} saved results</Text>
+                <Pressable onPress={onClearHistory}>
+                  <Text style={styles.clearText}>Clear all</Text>
+                </Pressable>
+              </View>
+              <View style={styles.historyStatsRow}>
+                <View style={[styles.historyStatBadge, { backgroundColor: 'rgba(239,68,68,0.12)' }]}>
+                  <Text style={[styles.historyStatBadgeText, { color: '#fca5a5' }]}>⚠ {counts.fraud} Fraud</Text>
+                </View>
+                <View style={[styles.historyStatBadge, { backgroundColor: 'rgba(245,158,11,0.12)' }]}>
+                  <Text style={[styles.historyStatBadgeText, { color: '#fcd34d' }]}>◈ {counts.suspicious} Suspicious</Text>
+                </View>
+                <View style={[styles.historyStatBadge, { backgroundColor: 'rgba(16,185,129,0.1)' }]}>
+                  <Text style={[styles.historyStatBadgeText, { color: '#6ee7b7' }]}>✓ {counts.safe} Safe</Text>
+                </View>
+              </View>
             </View>
           ) : null}
           ListEmptyComponent={<EmptyState title="No scans yet" subtitle="Run a scan or paste suspicious text to build your history." />}
@@ -680,11 +752,21 @@ function RiskCard({
         </View>
       ) : null}
 
-      <Text style={styles.cardBody} numberOfLines={expanded ? undefined : 3}>{entry.text}</Text>
+      <View style={styles.cardMessageSection}>
+        <Text style={styles.cardMessageLabel}>📨 Message sent to AI:</Text>
+        <Text style={styles.cardBody} numberOfLines={expanded ? undefined : 3}>{entry.text}</Text>
+      </View>
 
-      <View style={styles.inlineMetaRow}>
-        <Text style={styles.inlineMetaLabel}>Scam type:</Text>
-        <Text style={[styles.inlineMetaValue, { color: theme.txt }]}>{entry.scam_type}</Text>
+      <View style={styles.cardResultSection}>
+        <Text style={styles.cardResultLabel}>🤖 AI Verdict:</Text>
+        <View style={styles.inlineMetaRow}>
+          <Text style={styles.inlineMetaLabel}>Scam type:</Text>
+          <Text style={[styles.inlineMetaValue, { color: theme.txt }]}>{entry.scam_type}</Text>
+        </View>
+        <View style={styles.inlineMetaRow}>
+          <Text style={styles.inlineMetaLabel}>Risk score:</Text>
+          <Text style={[styles.inlineMetaValue, { color: theme.txt }]}>{entry.risk_score}/100</Text>
+        </View>
       </View>
 
       {expanded ? (
@@ -1119,6 +1201,132 @@ const styles = StyleSheet.create({
   },
   dimmed: {
     opacity: 0.6
+  },
+  scanStatsRow: {
+    flexDirection: 'row',
+    marginTop: 12,
+    backgroundColor: COLORS.surface,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    paddingVertical: 10,
+    alignItems: 'stretch'
+  },
+  scanStatItem: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  scanStatNumber: {
+    fontFamily: FONT,
+    fontSize: 20,
+    fontWeight: '900',
+    color: COLORS.text
+  },
+  scanStatLabel: {
+    fontFamily: FONT,
+    fontSize: 10,
+    color: COLORS.t2,
+    marginTop: 3
+  },
+  scanStatDivider: {
+    width: 1,
+    backgroundColor: COLORS.border
+  },
+  summaryPanel: {
+    backgroundColor: COLORS.surface,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 14
+  },
+  summaryTitle: {
+    color: COLORS.text,
+    fontFamily: FONT,
+    fontSize: 16,
+    fontWeight: '900'
+  },
+  summarySub: {
+    color: COLORS.t2,
+    fontFamily: FONT,
+    fontSize: 11,
+    marginTop: 4
+  },
+  summaryGrid: {
+    flexDirection: 'row',
+    marginTop: 12,
+    gap: 8
+  },
+  summaryCard: {
+    flex: 1,
+    backgroundColor: COLORS.s2,
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingVertical: 12,
+    alignItems: 'center'
+  },
+  summaryCardNumber: {
+    fontFamily: FONT,
+    fontSize: 18,
+    fontWeight: '900'
+  },
+  summaryCardLabel: {
+    fontFamily: FONT,
+    fontSize: 10,
+    color: COLORS.t2,
+    marginTop: 4
+  },
+  viewHistoryBtn: {
+    marginTop: 12,
+    backgroundColor: COLORS.accent,
+    borderRadius: 10,
+    paddingVertical: 10,
+    alignItems: 'center'
+  },
+  viewHistoryText: {
+    color: '#02261a',
+    fontFamily: FONT,
+    fontSize: 13,
+    fontWeight: '900'
+  },
+  historyStatsRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 14
+  },
+  historyStatBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 999
+  },
+  historyStatBadgeText: {
+    fontFamily: FONT,
+    fontSize: 11,
+    fontWeight: '800'
+  },
+  cardMessageSection: {
+    marginTop: 10,
+    backgroundColor: COLORS.s3,
+    borderRadius: 10,
+    padding: 10
+  },
+  cardMessageLabel: {
+    fontFamily: FONT,
+    fontSize: 10,
+    fontWeight: '800',
+    color: COLORS.t2,
+    marginBottom: 4
+  },
+  cardResultSection: {
+    marginTop: 8
+  },
+  cardResultLabel: {
+    fontFamily: FONT,
+    fontSize: 10,
+    fontWeight: '800',
+    color: COLORS.accent,
+    marginBottom: 4
   }
 });
 
