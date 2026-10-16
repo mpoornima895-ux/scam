@@ -40,27 +40,77 @@ const DANGER_SCORE = 80;
 const AUTO_KEY = 'scamsafe_auto_v1';
 const STORAGE_KEY = 'scamsafe_v1';
 
+// ============================================================
+// 🎨 DESIGN SYSTEM TOKENS (derived from The Outsiders reference)
+// ============================================================
 const COLORS = {
-  bg: '#050508',
-  surface: '#0e1015',
-  s2: '#14171f',
-  s3: '#1c2030',
-  border: '#1e2535',
-  accent: '#00e5a0',
-  text: '#f0f4ff',
-  t2: '#8899bb',
-  t3: '#445566',
-  white: '#ffffff',
-  red: '#ef4444'
+  bg: '#0E0E10',
+  surface: '#1A1A1D',
+  surfaceSubtle: '#141416',
+  surfaceRaised: '#222227',
+  surfaceBorder: 'rgba(255, 255, 255, 0.06)',
+  borderLight: 'rgba(255, 255, 255, 0.12)',
+
+  // Soft pastel semantic palette (no neon)
+  fraud: '#F4A6B8',       // soft coral / pink
+  fraudBg: 'rgba(244, 166, 184, 0.12)',
+  fraudBorder: 'rgba(244, 166, 184, 0.30)',
+
+  suspicious: '#F3E39A',  // soft butter-yellow
+  suspiciousBg: 'rgba(243, 227, 154, 0.12)',
+  suspiciousBorder: 'rgba(243, 227, 154, 0.30)',
+
+  safe: '#B7E4C7',        // soft mint
+  safeBg: 'rgba(183, 228, 199, 0.12)',
+  safeBorder: 'rgba(183, 228, 199, 0.30)',
+
+  // Hero Card pastel gradient mesh tokens
+  heroBase: '#E4E6A8',     // pale yellow-green
+  heroLavender: '#C9CBF2', // soft lavender
+  heroMint: '#CFE8D5',     // soft mint
+  heroDark: '#121316',
+
+  // Typography colors
+  text: '#F2F2F5',
+  t2: 'rgba(242, 242, 245, 0.65)',
+  t3: 'rgba(242, 242, 245, 0.40)',
+  textDark: '#0E0E10',
+
+  white: '#FFFFFF',
+  gold: '#F6D268'
 } as const;
 
 const RISK_THEME = {
-  High: { bg: 'rgba(239,68,68,0.1)', border: 'rgba(239,68,68,0.6)', chip: 'rgba(239,68,68,0.2)', txt: '#fca5a5' },
-  Medium: { bg: 'rgba(245,158,11,0.1)', border: 'rgba(245,158,11,0.6)', chip: 'rgba(245,158,11,0.2)', txt: '#fcd34d' },
-  Low: { bg: 'rgba(16,185,129,0.08)', border: 'rgba(16,185,129,0.5)', chip: 'rgba(16,185,129,0.15)', txt: '#6ee7b7' }
+  High: {
+    bg: COLORS.surface,
+    tint: COLORS.fraudBg,
+    border: COLORS.surfaceBorder,
+    chip: COLORS.fraudBg,
+    chipBorder: COLORS.fraudBorder,
+    txt: COLORS.fraud
+  },
+  Medium: {
+    bg: COLORS.surface,
+    tint: COLORS.suspiciousBg,
+    border: COLORS.surfaceBorder,
+    chip: COLORS.suspiciousBg,
+    chipBorder: COLORS.suspiciousBorder,
+    txt: COLORS.suspicious
+  },
+  Low: {
+    bg: COLORS.surface,
+    tint: COLORS.safeBg,
+    border: COLORS.surfaceBorder,
+    chip: COLORS.safeBg,
+    chipBorder: COLORS.safeBorder,
+    txt: COLORS.safe
+  }
 } as const;
 
-const FONT = Platform.select({ android: 'monospace', ios: 'Menlo', default: 'monospace' });
+const FONT = Platform.select({ android: 'sans-serif', ios: 'System', default: 'System' });
+const FONT_MEDIUM = Platform.select({ android: 'sans-serif-medium', ios: 'System', default: 'System' });
+
+const TypedFlatList = FlatList as unknown as React.ComponentType<any>;
 
 function App(): React.JSX.Element {
   const [tab, setTab] = useState<TabKey>('scan');
@@ -499,64 +549,145 @@ function App(): React.JSX.Element {
     );
   }, [expandedId, onDeleteEntry, onTogglePin]);
 
+  const totalScans = entries.length;
+  const fraudPercent = totalScans > 0 ? Math.round((counts.fraud / totalScans) * 100) : 0;
+  const suspPercent = totalScans > 0 ? Math.round((counts.suspicious / totalScans) * 100) : 0;
+  const safePercent = totalScans > 0 ? Math.round((counts.safe / totalScans) * 100) : 0;
+
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={COLORS.bg} />
+      <StatusBar barStyle="light-content" backgroundColor={COLORS.bg} translucent />
 
-      <Animated.View style={[styles.header, { opacity: fade }]}> 
-        <View style={styles.headerRow}>
-          <Text style={styles.brand}>ScamSafe</Text>
-          <View style={styles.betaBadge}>
-            <Text style={styles.betaText}>BETA</Text>
+      {/* 1) UNIFORM MODERN HEADER */}
+      <Animated.View style={[styles.header, { opacity: fade }]}>
+        <View style={styles.headerTopBar}>
+          <View style={styles.headerPillButton}>
+            <View style={styles.menuIconBar} />
+            <View style={[styles.menuIconBar, { width: 12 }]} />
+          </View>
+          <View style={styles.brandContainer}>
+            <Text style={styles.brandLight}>Scam<Text style={styles.brandBold}>Safe</Text></Text>
+            <View style={styles.betaBadge}>
+              <Text style={styles.betaText}>BETA</Text>
+            </View>
+          </View>
+          <View style={styles.headerPillButton}>
+            <View style={styles.shieldIconShape} />
           </View>
         </View>
-        <Text style={styles.headerSub}>AI-powered SMS fraud detector for Indian users</Text>
+        <Text style={styles.headerSub}>AI SMS fraud & scam protection</Text>
       </Animated.View>
 
-      <View style={styles.statsBar}>
-        <StatColumn icon="⚠" label="Fraud" value={counts.fraud} color="#fca5a5" />
-        <View style={styles.statsDivider} />
-        <StatColumn icon="◈" label="Suspicious" value={counts.suspicious} color="#fcd34d" />
-        <View style={styles.statsDivider} />
-        <StatColumn icon="✓" label="Safe" value={counts.safe} color="#6ee7b7" />
-      </View>
-
-      <View style={styles.tabs}>
-        <TabButton label="Scan" active={tab === 'scan'} onPress={() => setTab('scan')} />
-        <TabButton label="History" active={tab === 'history'} onPress={() => setTab('history')} />
-        <TabButton label={`Pinned (${pinnedEntries.length})`} active={tab === 'pinned'} onPress={() => setTab('pinned')} />
-      </View>
-
+      {/* 2) TAB CONTENT */}
       {tab === 'scan' ? (
-        <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
-          <View style={styles.panel}>
-            <View style={styles.rowBetween}>
-              <View style={styles.flexOne}>
-                <Text style={styles.panelTitle}>Auto-scan toggle</Text>
-                <Text style={styles.panelSub}>{autoNote}</Text>
+        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+          {/* PASTEL GRADIENT HERO CARD (The Outsiders reference) */}
+          <View style={styles.heroCard}>
+            {/* Layered pastel mesh glows (pure React Native, no external dependencies) */}
+            <View style={styles.heroMeshLavender} />
+            <View style={styles.heroMeshMint} />
+            <View style={styles.heroMeshSoftGlow} />
+
+            <View style={styles.heroContent}>
+              <View style={styles.heroHeaderRow}>
+                <View>
+                  <Text style={styles.heroGreetingLight}>Welcome to</Text>
+                  <Text style={styles.heroGreetingBold}>ScamSafe Protection</Text>
+                </View>
+                <View style={styles.heroBetaPill}>
+                  <View style={styles.heroPillDot} />
+                  <Text style={styles.heroBetaText}>ACTIVE</Text>
+                </View>
               </View>
-              <Switch
-                value={autoEnabled}
-                onValueChange={(value) => {
-                  void onToggleAuto(value);
-                }}
-                trackColor={{ false: COLORS.s3, true: COLORS.accent }}
-                thumbColor={autoEnabled ? '#0a2a21' : '#7b879f'}
-              />
+
+              {/* Dark Inner Card (like "Saldo disponible" in reference) */}
+              <View style={styles.heroInnerCard}>
+                <View style={styles.heroInnerCardHeader}>
+                  <Text style={styles.heroInnerCardLabel}>PROTECTION SUMMARY</Text>
+                  <Text style={styles.heroInnerCardCount}>{totalScans} Analyzed</Text>
+                </View>
+                <View style={styles.statsBar}>
+                  <StatColumn icon="!" label="Fraud" value={counts.fraud} color={COLORS.fraud} />
+                  <View style={styles.statsDivider} />
+                  <StatColumn icon="~" label="Suspicious" value={counts.suspicious} color={COLORS.suspicious} />
+                  <View style={styles.statsDivider} />
+                  <StatColumn icon="✓" label="Safe" value={counts.safe} color={COLORS.safe} />
+                </View>
+              </View>
             </View>
           </View>
 
-          <Pressable style={({ pressed }) => [styles.scanButton, pressed && styles.scalePressed, scanLoading && styles.dimmed]} onPress={() => { void onManualScan(); }}>
-            <Text style={styles.scanButtonText}>{scanLoading ? 'Analyzing...' : 'Scan My Messages'}</Text>
-            <Text style={styles.scanButtonSub}>Last 7 days · max {SCAN_LIMIT} SMS</Text>
+          {/* QUICK-ACTION TILES (like Agregar Gasto / Agregar Ingreso / Ver Transacción) */}
+          <View style={styles.quickActionsRow}>
+            <Pressable
+              style={({ pressed }) => [styles.quickTile, pressed && styles.scalePressed]}
+              onPress={() => {
+                // Focus / quick feedback
+              }}
+            >
+              <View style={[styles.quickTileIcon, { backgroundColor: 'rgba(201, 203, 242, 0.15)' }]}>
+                <Text style={[styles.quickTileGlyph, { color: COLORS.heroLavender }]}>✎</Text>
+              </View>
+              <Text style={styles.quickTileLabel}>Manual</Text>
+              <Text style={styles.quickTileSub}>Text check</Text>
+            </Pressable>
+
+            <Pressable
+              style={({ pressed }) => [styles.quickTile, pressed && styles.scalePressed]}
+              onPress={() => {
+                void onToggleAuto(!autoEnabled);
+              }}
+            >
+              <View style={[styles.quickTileIcon, { backgroundColor: autoEnabled ? 'rgba(183, 228, 199, 0.18)' : 'rgba(255, 255, 255, 0.08)' }]}>
+                <Text style={[styles.quickTileGlyph, { color: autoEnabled ? COLORS.safe : COLORS.t3 }]}>⚡</Text>
+              </View>
+              <Text style={styles.quickTileLabel}>Auto-Scan</Text>
+              <Text style={styles.quickTileSub}>{autoEnabled ? 'Enabled' : 'Paused'}</Text>
+            </Pressable>
+
+            <Pressable
+              style={({ pressed }) => [styles.quickTile, pressed && styles.scalePressed]}
+              onPress={() => setTab('history')}
+            >
+              <View style={[styles.quickTileIcon, { backgroundColor: 'rgba(243, 227, 154, 0.15)' }]}>
+                <Text style={[styles.quickTileGlyph, { color: COLORS.suspicious }]}>≡</Text>
+              </View>
+              <Text style={styles.quickTileLabel}>History</Text>
+              <Text style={styles.quickTileSub}>{entries.length} items</Text>
+            </Pressable>
+          </View>
+
+          {/* PRIMARY GRADIENT CTA CARD ("Agregar Nueva meta" style) */}
+          <Pressable
+            style={({ pressed }) => [styles.primaryCtaCard, pressed && styles.scalePressed, scanLoading && styles.dimmed]}
+            onPress={() => { void onManualScan(); }}
+          >
+            <View style={styles.primaryCtaMesh1} />
+            <View style={styles.primaryCtaMesh2} />
+            <View style={styles.primaryCtaRow}>
+              <View style={styles.primaryCtaTextCol}>
+                <Text style={styles.primaryCtaPretitle}>QUICK SCAN</Text>
+                <Text style={styles.primaryCtaTitle}>{scanLoading ? 'Analyzing SMS...' : 'Scan My Messages'}</Text>
+                <Text style={styles.primaryCtaSubtitle}>Last 7 days · max {SCAN_LIMIT} SMS</Text>
+              </View>
+              <View style={styles.primaryCtaCircleIcon}>
+                <Text style={styles.primaryCtaPlusGlyph}>+</Text>
+              </View>
+            </View>
           </Pressable>
 
+          {/* SCAN PROGRESS CARD ("Progreso" style from right reference phone) */}
           {scanLoading ? (
-            <View style={styles.progressWrap}>
+            <View style={styles.panel}>
+              <View style={styles.rowBetween}>
+                <Text style={styles.panelTitle}>Scanning Progress</Text>
+                <Text style={styles.progressPercentText}>{progressPercent}%</Text>
+              </View>
               <View style={styles.progressTrack}>
                 <View style={[styles.progressFill, { width: `${progressPercent}%` }]} />
               </View>
-              <Text style={styles.progressText}>Scanning {scanDone} of {scanTotal} messages...</Text>
+              <Text style={styles.progressText}>Analyzing message {scanDone} of {scanTotal}...</Text>
+
               <View style={styles.scanStatsRow}>
                 <View style={styles.scanStatItem}>
                   <Text style={styles.scanStatNumber}>{scanDone}</Text>
@@ -564,45 +695,113 @@ function App(): React.JSX.Element {
                 </View>
                 <View style={styles.scanStatDivider} />
                 <View style={styles.scanStatItem}>
-                  <Text style={[styles.scanStatNumber, { color: '#fca5a5' }]}>{scanDetected}</Text>
+                  <Text style={[styles.scanStatNumber, { color: COLORS.fraud }]}>{scanDetected}</Text>
                   <Text style={styles.scanStatLabel}>Threats</Text>
                 </View>
                 <View style={styles.scanStatDivider} />
                 <View style={styles.scanStatItem}>
-                  <Text style={[styles.scanStatNumber, { color: '#6ee7b7' }]}>{scanDone - scanDetected}</Text>
+                  <Text style={[styles.scanStatNumber, { color: COLORS.safe }]}>{Math.max(0, scanDone - scanDetected)}</Text>
                   <Text style={styles.scanStatLabel}>Safe</Text>
                 </View>
               </View>
             </View>
           ) : null}
 
+          {/* SCAN COMPLETE SUMMARY */}
           {scanComplete && lastScanSummary ? (
             <View style={styles.summaryPanel}>
-              <Text style={styles.summaryTitle}>✅ Scan Complete</Text>
-              <Text style={styles.summarySub}>{lastScanSummary.total} messages sent to AI for review</Text>
+              <View style={styles.summaryTitleRow}>
+                <View style={styles.summaryCheckCircle}>
+                  <Text style={styles.summaryCheckGlyph}>✓</Text>
+                </View>
+                <View style={styles.flexOne}>
+                  <Text style={styles.summaryTitle}>Scan Complete</Text>
+                  <Text style={styles.summarySub}>{lastScanSummary.total} messages verified with AI</Text>
+                </View>
+              </View>
+
               <View style={styles.summaryGrid}>
-                <View style={[styles.summaryCard, { borderColor: 'rgba(239,68,68,0.5)' }]}>
-                  <Text style={[styles.summaryCardNumber, { color: '#fca5a5' }]}>🚫 {lastScanSummary.threats}</Text>
+                <View style={[styles.summaryCard, { backgroundColor: COLORS.fraudBg, borderColor: COLORS.fraudBorder }]}>
+                  <Text style={[styles.summaryCardNumber, { color: COLORS.fraud }]}>{lastScanSummary.threats}</Text>
                   <Text style={styles.summaryCardLabel}>Don't Click</Text>
                 </View>
-                <View style={[styles.summaryCard, { borderColor: 'rgba(245,158,11,0.5)' }]}>
-                  <Text style={[styles.summaryCardNumber, { color: '#fcd34d' }]}>⚠ {lastScanSummary.medium}</Text>
+                <View style={[styles.summaryCard, { backgroundColor: COLORS.suspiciousBg, borderColor: COLORS.suspiciousBorder }]}>
+                  <Text style={[styles.summaryCardNumber, { color: COLORS.suspicious }]}>{lastScanSummary.medium}</Text>
                   <Text style={styles.summaryCardLabel}>Suspicious</Text>
                 </View>
-                <View style={[styles.summaryCard, { borderColor: 'rgba(16,185,129,0.5)' }]}>
-                  <Text style={[styles.summaryCardNumber, { color: '#6ee7b7' }]}>✓ {lastScanSummary.safe}</Text>
+                <View style={[styles.summaryCard, { backgroundColor: COLORS.safeBg, borderColor: COLORS.safeBorder }]}>
+                  <Text style={[styles.summaryCardNumber, { color: COLORS.safe }]}>{lastScanSummary.safe}</Text>
                   <Text style={styles.summaryCardLabel}>Safe</Text>
                 </View>
               </View>
-              <Pressable style={styles.viewHistoryBtn} onPress={() => setTab('history')}>
+
+              <Pressable style={({ pressed }) => [styles.viewHistoryBtn, pressed && styles.scalePressed]} onPress={() => setTab('history')}>
                 <Text style={styles.viewHistoryText}>View Full History →</Text>
               </Pressable>
             </View>
           ) : null}
 
+          {/* "INFORME FINANCIERO" STYLE PROPORTION OVERVIEW */}
           <View style={styles.panel}>
-            <Text style={styles.panelTitle}>Manual text check</Text>
-            <Text style={styles.panelSub}>Paste a suspicious SMS, UPI alert, bank text, or phishing attempt</Text>
+            <View style={styles.rowBetween}>
+              <View>
+                <Text style={styles.panelTitle}>Risk Distribution</Text>
+                <Text style={styles.panelSub}>Based on your scanned messages</Text>
+              </View>
+              <View style={styles.pillBadgeMuted}>
+                <Text style={styles.pillBadgeMutedText}>{totalScans} TOTAL</Text>
+              </View>
+            </View>
+
+            <View style={styles.chartBarsRow}>
+              <View style={styles.chartCol}>
+                <Text style={styles.chartPercentLabel}>{fraudPercent}%</Text>
+                <View style={styles.chartBarTrack}>
+                  <View style={[styles.chartBarFill, { height: `${Math.max(12, fraudPercent)}%`, backgroundColor: COLORS.fraud }]} />
+                </View>
+                <Text style={styles.chartBarName}>Fraud</Text>
+              </View>
+
+              <View style={styles.chartCol}>
+                <Text style={styles.chartPercentLabel}>{suspPercent}%</Text>
+                <View style={styles.chartBarTrack}>
+                  <View style={[styles.chartBarFill, { height: `${Math.max(12, suspPercent)}%`, backgroundColor: COLORS.suspicious }]} />
+                </View>
+                <Text style={styles.chartBarName}>Suspicious</Text>
+              </View>
+
+              <View style={styles.chartCol}>
+                <Text style={styles.chartPercentLabel}>{safePercent}%</Text>
+                <View style={styles.chartBarTrack}>
+                  <View style={[styles.chartBarFill, { height: `${Math.max(12, safePercent)}%`, backgroundColor: COLORS.safe }]} />
+                </View>
+                <Text style={styles.chartBarName}>Safe</Text>
+              </View>
+            </View>
+          </View>
+
+          {/* AUTO-SCAN ROW */}
+          <View style={styles.panel}>
+            <View style={styles.rowBetween}>
+              <View style={styles.flexOne}>
+                <Text style={styles.panelTitle}>Background Auto-Scan</Text>
+                <Text style={styles.panelSub}>{autoNote}</Text>
+              </View>
+              <Switch
+                value={autoEnabled}
+                onValueChange={(value) => {
+                  void onToggleAuto(value);
+                }}
+                trackColor={{ false: '#26262B', true: COLORS.safe }}
+                thumbColor={autoEnabled ? '#0D1E15' : '#8E8E93'}
+              />
+            </View>
+          </View>
+
+          {/* MANUAL TEXT CHECK CARD */}
+          <View style={styles.panel}>
+            <Text style={styles.panelTitle}>Manual Text Check</Text>
+            <Text style={styles.panelSub}>Paste a suspicious SMS, UPI alert, bank text, or phishing link</Text>
             <TextInput
               value={manualText}
               onChangeText={setManualText}
@@ -612,14 +811,18 @@ function App(): React.JSX.Element {
               placeholderTextColor={COLORS.t3}
               textAlignVertical="top"
             />
-            <View style={styles.rowBetween}>
-              <Text style={styles.helperText}>Minimum 10 characters</Text>
+            <View style={styles.manualActionRow}>
+              <Text style={styles.helperText}>Min. 10 characters</Text>
               <Pressable
-                style={({ pressed }) => [styles.checkButton, pressed && styles.scalePressed, manualText.trim().length < 10 && styles.dimmed, manualLoading && styles.dimmed]}
+                style={({ pressed }) => [
+                  styles.checkButton,
+                  pressed && styles.scalePressed,
+                  (manualText.trim().length < 10 || manualLoading) && styles.dimmed
+                ]}
                 disabled={manualText.trim().length < 10 || manualLoading}
                 onPress={() => { void onManualTextCheck(); }}
               >
-                <Text style={styles.checkButtonText}>{manualLoading ? 'Checking...' : 'Analyze Text'}</Text>
+                <Text style={styles.checkButtonText}>{manualLoading ? 'Analyzing...' : 'Analyze Text'}</Text>
               </Pressable>
             </View>
 
@@ -639,54 +842,135 @@ function App(): React.JSX.Element {
         </ScrollView>
       ) : null}
 
+      {/* 3) HISTORY TAB (Workouts History reference) */}
       {tab === 'history' ? (
-        <FlatList
+        <TypedFlatList
           data={entries}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item: Entry) => item.id}
           contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
           ListHeaderComponent={entries.length > 0 ? (
-            <View>
-              <View style={styles.historyHeader}>
-                <Text style={styles.historyHeaderText}>{entries.length} saved results</Text>
-                <Pressable onPress={onClearHistory}>
-                  <Text style={styles.clearText}>Clear all</Text>
-                </Pressable>
-              </View>
-              <View style={styles.historyStatsRow}>
-                <View style={[styles.historyStatBadge, { backgroundColor: 'rgba(239,68,68,0.12)' }]}>
-                  <Text style={[styles.historyStatBadgeText, { color: '#fca5a5' }]}>⚠ {counts.fraud} Fraud</Text>
+            <View style={styles.historySectionHeader}>
+              <View style={styles.rowBetween}>
+                <View>
+                  <Text style={styles.historySectionTitle}>History</Text>
+                  <Text style={styles.historySectionSub}>{entries.length} SAVED RESULTS</Text>
                 </View>
-                <View style={[styles.historyStatBadge, { backgroundColor: 'rgba(245,158,11,0.12)' }]}>
-                  <Text style={[styles.historyStatBadgeText, { color: '#fcd34d' }]}>◈ {counts.suspicious} Suspicious</Text>
-                </View>
-                <View style={[styles.historyStatBadge, { backgroundColor: 'rgba(16,185,129,0.1)' }]}>
-                  <Text style={[styles.historyStatBadgeText, { color: '#6ee7b7' }]}>✓ {counts.safe} Safe</Text>
+                <View style={styles.historyHeaderChipsRow}>
+                  <View style={[styles.historySmallChip, { backgroundColor: COLORS.fraudBg }]}>
+                    <View style={[styles.chipDot, { backgroundColor: COLORS.fraud }]} />
+                    <Text style={[styles.chipText, { color: COLORS.fraud }]}>{counts.fraud}</Text>
+                  </View>
+                  <View style={[styles.historySmallChip, { backgroundColor: COLORS.suspiciousBg }]}>
+                    <View style={[styles.chipDot, { backgroundColor: COLORS.suspicious }]} />
+                    <Text style={[styles.chipText, { color: COLORS.suspicious }]}>{counts.suspicious}</Text>
+                  </View>
+                  <View style={[styles.historySmallChip, { backgroundColor: COLORS.safeBg }]}>
+                    <View style={[styles.chipDot, { backgroundColor: COLORS.safe }]} />
+                    <Text style={[styles.chipText, { color: COLORS.safe }]}>{counts.safe}</Text>
+                  </View>
+                  <Pressable style={({ pressed }) => [styles.clearPillButton, pressed && styles.scalePressed]} onPress={onClearHistory}>
+                    <Text style={styles.clearPillText}>Clear</Text>
+                  </Pressable>
                 </View>
               </View>
             </View>
           ) : null}
-          ListEmptyComponent={<EmptyState title="No scans yet" subtitle="Run a scan or paste suspicious text to build your history." />}
+          ListEmptyComponent={
+            <EmptyState
+              title="No scans yet"
+              subtitle="Run a scan or paste a suspicious SMS above to verify threats and build your history."
+            />
+          }
           renderItem={renderHistoryCard}
         />
       ) : null}
 
+      {/* 4) PINNED TAB */}
       {tab === 'pinned' ? (
-        <FlatList
+        <TypedFlatList
           data={pinnedEntries}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item: Entry) => item.id}
           contentContainerStyle={styles.listContent}
-          ListEmptyComponent={<EmptyState title="No pinned threats" subtitle="High-risk SMS are pinned automatically so you can review them quickly." />}
+          showsVerticalScrollIndicator={false}
+          ListHeaderComponent={pinnedEntries.length > 0 ? (
+            <View style={styles.historySectionHeader}>
+              <View style={styles.rowBetween}>
+                <View>
+                  <Text style={styles.historySectionTitle}>Pinned</Text>
+                  <Text style={styles.historySectionSub}>{pinnedEntries.length} SAVED THREATS</Text>
+                </View>
+                <View style={[styles.historySmallChip, { backgroundColor: COLORS.fraudBg }]}>
+                  <Text style={[styles.chipText, { color: COLORS.fraud }]}>★ {pinnedEntries.length}</Text>
+                </View>
+              </View>
+            </View>
+          ) : null}
+          ListEmptyComponent={
+            <EmptyState
+              title="No pinned threats"
+              subtitle="High-risk and flagged SMS messages can be pinned here for immediate inspection."
+            />
+          }
           renderItem={renderHistoryCard}
         />
       ) : null}
+
+      {/* 5) FLOATING BOTTOM NAVIGATION BAR (Capsule pill style from Workouts reference) */}
+      <View style={styles.bottomNavContainer}>
+        <View style={styles.floatingNavBar}>
+          <Pressable
+            style={[styles.floatingTabItem, tab === 'scan' && styles.floatingTabItemActive]}
+            onPress={() => setTab('scan')}
+          >
+            <View style={styles.tabIconShape}>
+              <View style={[styles.tabIconRadarCircle, tab === 'scan' && { borderColor: COLORS.safe }]} />
+            </View>
+            <Text style={[styles.floatingTabLabel, tab === 'scan' && styles.floatingTabLabelActive]}>Scan</Text>
+          </Pressable>
+
+          <Pressable
+            style={[styles.floatingTabItem, tab === 'history' && styles.floatingTabItemActive]}
+            onPress={() => setTab('history')}
+          >
+            <View style={styles.tabIconShape}>
+              <View style={[styles.tabIconListLine, tab === 'history' && { backgroundColor: COLORS.heroLavender }]} />
+              <View style={[styles.tabIconListLine, { width: 8 }, tab === 'history' && { backgroundColor: COLORS.heroLavender }]} />
+            </View>
+            <Text style={[styles.floatingTabLabel, tab === 'history' && styles.floatingTabLabelActive]}>History</Text>
+          </Pressable>
+
+          <Pressable
+            style={[styles.floatingTabItem, tab === 'pinned' && styles.floatingTabItemActive]}
+            onPress={() => setTab('pinned')}
+          >
+            <View style={styles.tabIconShape}>
+              <Text style={[styles.tabStarGlyph, tab === 'pinned' && { color: COLORS.gold }]}>★</Text>
+            </View>
+            <Text style={[styles.floatingTabLabel, tab === 'pinned' && styles.floatingTabLabelActive]}>Pinned</Text>
+            {pinnedEntries.length > 0 ? (
+              <View style={styles.tabBadge}>
+                <Text style={styles.tabBadgeText}>{pinnedEntries.length}</Text>
+              </View>
+            ) : null}
+          </Pressable>
+        </View>
+      </View>
     </View>
   );
 }
 
+// ============================================================
+// 🧩 PRESENTATIONAL HELPER COMPONENTS
+// ============================================================
+
 function StatColumn({ icon, label, value, color }: { icon: string; label: string; value: number; color: string }): React.JSX.Element {
   return (
     <View style={styles.statColumn}>
-      <Text style={[styles.statValue, { color }]}>{icon} {value}</Text>
+      <View style={styles.statNumberRow}>
+        <Text style={[styles.statIconDot, { color }]}>{icon}</Text>
+        <Text style={[styles.statValue, { color }]}>{value}</Text>
+      </View>
       <Text style={styles.statLabel}>{label}</Text>
     </View>
   );
@@ -704,6 +988,9 @@ function TabButton({ label, active, onPress }: { label: string; active: boolean;
 function EmptyState({ title, subtitle }: { title: string; subtitle: string }): React.JSX.Element {
   return (
     <View style={styles.emptyState}>
+      <View style={styles.emptyIconCircle}>
+        <View style={styles.emptyShieldGlyph} />
+      </View>
       <Text style={styles.emptyTitle}>{title}</Text>
       <Text style={styles.emptySubtitle}>{subtitle}</Text>
     </View>
@@ -713,7 +1000,8 @@ function EmptyState({ title, subtitle }: { title: string; subtitle: string }): R
 function DangerTag({ score, large }: { score: number; large?: boolean }): React.JSX.Element {
   return (
     <View style={[styles.dangerTag, large && styles.dangerTagLarge]}>
-      <Text style={[styles.dangerTagText, large && styles.dangerTagTextLarge]}>🚫 DON'T CLICK · {score}/100</Text>
+      <View style={styles.dangerTagDot} />
+      <Text style={[styles.dangerTagText, large && styles.dangerTagTextLarge]}>Don't Click · {score}/100</Text>
     </View>
   );
 }
@@ -732,158 +1020,1222 @@ function RiskCard({
   onDelete?: () => void;
 }): React.JSX.Element {
   const theme = RISK_THEME[entry.risk_level];
-  const showDanger = entry.risk_score >= DANGER_SCORE || entry.risk_level === 'High';
+  const isHighRisk = entry.risk_score >= DANGER_SCORE || entry.risk_level === 'High';
+  const scorePercent = Math.min(100, Math.max(0, entry.risk_score));
 
   return (
-    <Pressable onPress={onToggle} style={[styles.card, { backgroundColor: theme.bg, borderColor: theme.border }]}> 
-      <View style={styles.rowBetweenTop}>
-        <View style={styles.flexOne}>
-          <Text style={styles.cardSender} numberOfLines={1}>{entry.sender}</Text>
-          <Text style={styles.cardDate}>{new Date(entry.time).toLocaleString()}</Text>
+    <Pressable onPress={onToggle} style={({ pressed }) => [styles.card, pressed && styles.scalePressed]}>
+      {/* Top row matching workout item in reference */}
+      <View style={styles.cardHeaderRow}>
+        {/* Left circular risk badge */}
+        <View style={[styles.cardAvatarBadge, { backgroundColor: theme.tint }]}>
+          <Text style={[styles.cardAvatarGlyph, { color: theme.txt }]}>
+            {entry.risk_level === 'High' ? '!' : entry.risk_level === 'Medium' ? '▲' : '✓'}
+          </Text>
+          {entry.pinned ? (
+            <View style={styles.pinnedStarBadge}>
+              <Text style={styles.pinnedStarText}>★</Text>
+            </View>
+          ) : null}
         </View>
-        <View style={[styles.riskChip, { backgroundColor: theme.chip, borderColor: theme.border }]}> 
-          <Text style={[styles.riskChipText, { color: theme.txt }]}>{entry.risk_level} · {entry.risk_score}</Text>
+
+        {/* Center sender + preview + metadata chips */}
+        <View style={styles.cardCenterCol}>
+          <View style={styles.rowBetween}>
+            <Text style={styles.cardSender} numberOfLines={1}>{entry.sender}</Text>
+            <View style={[styles.riskPill, { backgroundColor: theme.chip, borderColor: theme.chipBorder }]}>
+              <View style={[styles.riskPillDot, { backgroundColor: theme.txt }]} />
+              <Text style={[styles.riskPillText, { color: theme.txt }]}>{entry.risk_level} · {entry.risk_score}</Text>
+            </View>
+          </View>
+
+          <Text style={styles.cardDate}>{new Date(entry.time).toLocaleString()}</Text>
+
+          <Text style={styles.cardBodyPreview} numberOfLines={expanded ? undefined : 1} ellipsizeMode="tail">
+            {entry.text}
+          </Text>
+
+          <View style={styles.cardMetaChipsRow}>
+            <View style={styles.metaChip}>
+              <Text style={styles.metaChipText}>Score {entry.risk_score}/100</Text>
+            </View>
+            <View style={styles.metaChip}>
+              <Text style={styles.metaChipText} numberOfLines={1}>{entry.scam_type}</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Right chevron indicator */}
+        <View style={styles.chevronWrap}>
+          <Text style={styles.chevronText}>{expanded ? 'ˬ' : '›'}</Text>
         </View>
       </View>
 
-      {showDanger ? (
-        <View style={styles.dangerRow}>
-          <DangerTag score={entry.risk_score} large={expanded} />
+      {/* Danger soft pill tag */}
+      {isHighRisk && !expanded ? (
+        <View style={styles.cardDangerPillRow}>
+          <DangerTag score={entry.risk_score} />
         </View>
       ) : null}
 
-      <View style={styles.cardMessageSection}>
-        <Text style={styles.cardMessageLabel}>📨 Message sent to AI:</Text>
-        <Text style={styles.cardBody} numberOfLines={expanded ? undefined : 3}>{entry.text}</Text>
-      </View>
-
-      <View style={styles.cardResultSection}>
-        <Text style={styles.cardResultLabel}>🤖 AI Verdict:</Text>
-        <View style={styles.inlineMetaRow}>
-          <Text style={styles.inlineMetaLabel}>Scam type:</Text>
-          <Text style={[styles.inlineMetaValue, { color: theme.txt }]}>{entry.scam_type}</Text>
-        </View>
-        <View style={styles.inlineMetaRow}>
-          <Text style={styles.inlineMetaLabel}>Risk score:</Text>
-          <Text style={[styles.inlineMetaValue, { color: theme.txt }]}>{entry.risk_score}/100</Text>
-        </View>
-      </View>
-
+      {/* EXPANDED DETAILS (revealed when expanded === true) */}
       {expanded ? (
         <View style={styles.detailSection}>
-          <Text style={styles.detailHeading}>Explanation</Text>
-          <Text style={styles.detailText}>{entry.explanation}</Text>
-
-          <Text style={styles.detailHeading}>Scam signals</Text>
-          {entry.scam_signals.length > 0 ? entry.scam_signals.map((signal, index) => (
-            <Text key={`${entry.id}-signal-${index}`} style={styles.detailBullet}>• {signal}</Text>
-          )) : <Text style={styles.detailText}>No additional signals provided.</Text>}
-
-          <Text style={styles.detailHeading}>Recommended action</Text>
-          <Text style={styles.detailText}>{entry.recommended_action}</Text>
-
-          {entry.if_already_sent ? (
-            <>
-              <Text style={styles.detailHeading}>If already sent</Text>
-              <Text style={styles.detailText}>{entry.if_already_sent}</Text>
-            </>
+          {isHighRisk ? (
+            <View style={styles.dangerRowExpanded}>
+              <DangerTag score={entry.risk_score} large />
+            </View>
           ) : null}
 
-          <Text style={styles.confidenceText}>Confidence: {Math.round(entry.confidence * 100)}%</Text>
+          {/* Full SMS message in dark inset card */}
+          <View style={styles.cardMessageSection}>
+            <Text style={styles.cardMessageLabel}>SMS MESSAGE</Text>
+            <Text style={styles.cardBodyFull}>{entry.text}</Text>
+          </View>
+
+          {/* AI Verdict & Risk Bar */}
+          <View style={styles.cardResultSection}>
+            <Text style={styles.cardResultLabel}>AI VERDICT</Text>
+            <View style={styles.verdictScoreBarTrack}>
+              <View style={[styles.verdictScoreBarFill, { width: `${scorePercent}%`, backgroundColor: theme.txt }]} />
+            </View>
+
+            <View style={styles.inlineMetaRow}>
+              <Text style={styles.inlineMetaLabel}>Scam Type:</Text>
+              <Text style={[styles.inlineMetaValue, { color: theme.txt }]}>{entry.scam_type}</Text>
+            </View>
+          </View>
+
+          <View style={styles.explanationSection}>
+            <Text style={styles.detailHeading}>Explanation</Text>
+            <Text style={styles.detailText}>{entry.explanation}</Text>
+
+            <Text style={styles.detailHeading}>Scam signals</Text>
+            {entry.scam_signals.length > 0 ? (
+              entry.scam_signals.map((signal, index) => (
+                <View key={`${entry.id}-signal-${index}`} style={styles.bulletRow}>
+                  <View style={[styles.bulletDot, { backgroundColor: theme.txt }]} />
+                  <Text style={styles.detailBulletText}>{signal}</Text>
+                </View>
+              ))
+            ) : (
+              <Text style={styles.detailText}>No additional signals detected.</Text>
+            )}
+
+            <Text style={styles.detailHeading}>Recommended action</Text>
+            <Text style={styles.detailText}>{entry.recommended_action}</Text>
+
+            {entry.if_already_sent ? (
+              <>
+                <Text style={styles.detailHeading}>If already sent</Text>
+                <Text style={styles.detailText}>{entry.if_already_sent}</Text>
+              </>
+            ) : null}
+
+            <Text style={styles.confidenceText}>Confidence: {Math.round(entry.confidence * 100)}%</Text>
+          </View>
+
+          {/* Action buttons (Pin + Delete in soft pill style) */}
+          <View style={styles.actionRow}>
+            <Pressable style={({ pressed }) => [styles.actionButton, pressed && styles.scalePressed]} onPress={onPin}>
+              <Text style={styles.actionButtonText}>{entry.pinned ? '★ Unpin' : '☆ Pin'}</Text>
+            </Pressable>
+            <Pressable style={({ pressed }) => [styles.actionButtonDelete, pressed && styles.scalePressed]} onPress={onDelete}>
+              <Text style={styles.actionButtonDeleteText}>Delete</Text>
+            </Pressable>
+          </View>
         </View>
       ) : null}
-
-      <View style={styles.actionRow}>
-        <Pressable style={styles.actionButton} onPress={onPin}>
-          <Text style={styles.actionButtonText}>{entry.pinned ? '★ Unpin' : '☆ Pin'}</Text>
-        </Pressable>
-        <Pressable style={styles.actionButton} onPress={onDelete}>
-          <Text style={[styles.actionButtonText, { color: '#fca5a5' }]}>Delete</Text>
-        </Pressable>
-      </View>
     </Pressable>
   );
 }
 
+// ============================================================
+// 🎨 STYLESHEET (The Outsiders + Workouts visual design)
+// ============================================================
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.bg,
-    paddingTop: Platform.OS === 'android' ? 34 : 54
+    paddingTop: Platform.OS === 'android' ? 44 : 56
   },
+
+  // 1) HEADER
   header: {
     paddingHorizontal: 20,
-    paddingBottom: 12
+    paddingBottom: 14
   },
-  headerRow: {
+  headerTopBar: {
     flexDirection: 'row',
-    alignItems: 'center'
+    alignItems: 'center',
+    justifyContent: 'space-between'
   },
-  brand: {
-    color: COLORS.text,
-    fontFamily: FONT,
-    fontSize: 30,
-    fontWeight: '800',
-    letterSpacing: 1
-  },
-  betaBadge: {
-    marginLeft: 8,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 999,
-    backgroundColor: 'rgba(0,229,160,0.12)',
-    borderWidth: 1,
-    borderColor: COLORS.accent
-  },
-  betaText: {
-    color: COLORS.accent,
-    fontFamily: FONT,
-    fontSize: 10,
-    fontWeight: '800'
-  },
-  headerSub: {
-    marginTop: 5,
-    color: COLORS.t2,
-    fontFamily: FONT,
-    fontSize: 12
-  },
-  statsBar: {
-    marginHorizontal: 20,
+  headerPillButton: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
     backgroundColor: COLORS.surface,
     borderWidth: 1,
-    borderColor: COLORS.border,
-    borderRadius: 14,
-    flexDirection: 'row',
-    paddingVertical: 12,
-    alignItems: 'stretch'
-  },
-  statColumn: {
-    flex: 1,
+    borderColor: COLORS.surfaceBorder,
     alignItems: 'center',
     justifyContent: 'center'
   },
-  statsDivider: {
-    width: 1,
-    backgroundColor: COLORS.border
+  menuIconBar: {
+    width: 16,
+    height: 2,
+    backgroundColor: COLORS.t2,
+    borderRadius: 1,
+    marginVertical: 1.5
+  },
+  shieldIconShape: {
+    width: 14,
+    height: 16,
+    borderRadius: 4,
+    borderWidth: 1.8,
+    borderColor: COLORS.t2
+  },
+  brandContainer: {
+    flexDirection: 'row',
+    alignItems: 'center'
+  },
+  brandLight: {
+    color: COLORS.text,
+    fontFamily: FONT,
+    fontSize: 22,
+    fontWeight: '300',
+    letterSpacing: -0.5
+  },
+  brandBold: {
+    color: COLORS.text,
+    fontFamily: FONT_MEDIUM,
+    fontWeight: '700'
+  },
+  betaBadge: {
+    marginLeft: 8,
+    paddingHorizontal: 7,
+    paddingVertical: 2.5,
+    borderRadius: 999,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.12)'
+  },
+  betaText: {
+    color: COLORS.t2,
+    fontFamily: FONT_MEDIUM,
+    fontSize: 9,
+    fontWeight: '700',
+    letterSpacing: 0.8
+  },
+  headerSub: {
+    marginTop: 6,
+    color: COLORS.t3,
+    fontFamily: FONT,
+    fontSize: 12,
+    textAlign: 'center'
+  },
+
+  // SCROLL CONTENT
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingBottom: 120
+  },
+
+  // HERO CARD (Soft Pastel Gradient Mesh)
+  heroCard: {
+    backgroundColor: COLORS.heroBase,
+    borderRadius: 28,
+    overflow: 'hidden',
+    position: 'relative',
+    marginBottom: 16,
+    elevation: 3
+  },
+  heroMeshLavender: {
+    position: 'absolute',
+    top: -40,
+    right: -40,
+    width: 220,
+    height: 220,
+    borderRadius: 110,
+    backgroundColor: COLORS.heroLavender,
+    opacity: 0.85
+  },
+  heroMeshMint: {
+    position: 'absolute',
+    bottom: -50,
+    left: -20,
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    backgroundColor: COLORS.heroMint,
+    opacity: 0.85
+  },
+  heroMeshSoftGlow: {
+    position: 'absolute',
+    bottom: 20,
+    right: 20,
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    backgroundColor: '#FFEFA6',
+    opacity: 0.5
+  },
+  heroContent: {
+    padding: 20,
+    zIndex: 1
+  },
+  heroHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start'
+  },
+  heroGreetingLight: {
+    fontFamily: FONT,
+    fontSize: 15,
+    color: 'rgba(14, 14, 16, 0.7)',
+    fontWeight: '400'
+  },
+  heroGreetingBold: {
+    fontFamily: FONT_MEDIUM,
+    fontSize: 22,
+    fontWeight: '800',
+    color: COLORS.heroDark,
+    letterSpacing: -0.4,
+    marginTop: 2
+  },
+  heroBetaPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(18, 19, 22, 0.88)',
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 5
+  },
+  heroPillDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: COLORS.safe,
+    marginRight: 6
+  },
+  heroBetaText: {
+    color: COLORS.white,
+    fontFamily: FONT_MEDIUM,
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 0.6
+  },
+  heroInnerCard: {
+    marginTop: 18,
+    backgroundColor: COLORS.surfaceSubtle,
+    borderRadius: 22,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)'
+  },
+  heroInnerCardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12
+  },
+  heroInnerCardLabel: {
+    fontFamily: FONT_MEDIUM,
+    fontSize: 11,
+    fontWeight: '700',
+    color: COLORS.t3,
+    letterSpacing: 0.8
+  },
+  heroInnerCardCount: {
+    fontFamily: FONT,
+    fontSize: 11,
+    color: COLORS.t2
+  },
+  statsBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between'
+  },
+  statColumn: {
+    flex: 1,
+    alignItems: 'center'
+  },
+  statNumberRow: {
+    flexDirection: 'row',
+    alignItems: 'center'
+  },
+  statIconDot: {
+    fontSize: 12,
+    fontWeight: '800',
+    marginRight: 4
   },
   statValue: {
-    fontFamily: FONT,
-    fontSize: 16,
+    fontFamily: FONT_MEDIUM,
+    fontSize: 18,
     fontWeight: '800'
   },
   statLabel: {
-    marginTop: 4,
+    marginTop: 3,
     color: COLORS.t2,
+    fontFamily: FONT,
+    fontSize: 11
+  },
+  statsDivider: {
+    width: 1,
+    height: 28,
+    backgroundColor: COLORS.surfaceBorder
+  },
+
+  // QUICK ACTIONS ROW (3 tiles)
+  quickActionsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 10,
+    marginBottom: 16
+  },
+  quickTile: {
+    flex: 1,
+    backgroundColor: COLORS.surface,
+    borderRadius: 22,
+    paddingVertical: 14,
+    paddingHorizontal: 12,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: COLORS.surfaceBorder
+  },
+  quickTileIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8
+  },
+  quickTileGlyph: {
+    fontSize: 15,
+    fontWeight: '700'
+  },
+  quickTileLabel: {
+    fontFamily: FONT_MEDIUM,
+    fontSize: 12,
+    fontWeight: '700',
+    color: COLORS.text
+  },
+  quickTileSub: {
+    marginTop: 2,
+    fontFamily: FONT,
+    fontSize: 10,
+    color: COLORS.t3
+  },
+
+  // PRIMARY CTA CARD ("Agregar Nueva meta" style)
+  primaryCtaCard: {
+    backgroundColor: COLORS.heroBase,
+    borderRadius: 24,
+    overflow: 'hidden',
+    padding: 18,
+    marginBottom: 16,
+    position: 'relative'
+  },
+  primaryCtaMesh1: {
+    position: 'absolute',
+    right: -20,
+    top: -20,
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    backgroundColor: COLORS.heroLavender,
+    opacity: 0.9
+  },
+  primaryCtaMesh2: {
+    position: 'absolute',
+    left: 40,
+    bottom: -30,
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: COLORS.heroMint,
+    opacity: 0.8
+  },
+  primaryCtaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    zIndex: 1
+  },
+  primaryCtaTextCol: {
+    flex: 1
+  },
+  primaryCtaPretitle: {
+    fontFamily: FONT_MEDIUM,
+    fontSize: 10,
+    fontWeight: '700',
+    color: 'rgba(14, 14, 16, 0.65)',
+    letterSpacing: 0.8
+  },
+  primaryCtaTitle: {
+    fontFamily: FONT_MEDIUM,
+    fontSize: 19,
+    fontWeight: '800',
+    color: COLORS.heroDark,
+    letterSpacing: -0.3,
+    marginTop: 2
+  },
+  primaryCtaSubtitle: {
+    marginTop: 4,
+    fontFamily: FONT,
+    fontSize: 12,
+    color: 'rgba(14, 14, 16, 0.75)'
+  },
+  primaryCtaCircleIcon: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: 'rgba(14, 14, 16, 0.85)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 12
+  },
+  primaryCtaPlusGlyph: {
+    color: COLORS.white,
+    fontSize: 22,
+    fontWeight: '400',
+    lineHeight: 24
+  },
+
+  // CARDS / PANELS
+  panel: {
+    backgroundColor: COLORS.surface,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: COLORS.surfaceBorder,
+    padding: 18,
+    marginBottom: 16
+  },
+  panelTitle: {
+    color: COLORS.text,
+    fontFamily: FONT_MEDIUM,
+    fontSize: 15,
+    fontWeight: '700'
+  },
+  panelSub: {
+    color: COLORS.t2,
+    fontFamily: FONT,
+    fontSize: 12,
+    marginTop: 4
+  },
+  rowBetween: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between'
+  },
+  flexOne: {
+    flex: 1
+  },
+
+  // PROGRESS TRACK
+  progressTrack: {
+    height: 8,
+    backgroundColor: COLORS.surfaceSubtle,
+    borderRadius: 999,
+    overflow: 'hidden',
+    marginTop: 12
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: COLORS.safe,
+    borderRadius: 999
+  },
+  progressText: {
+    marginTop: 8,
+    color: COLORS.t2,
+    fontFamily: FONT,
+    fontSize: 11
+  },
+  progressPercentText: {
+    fontFamily: FONT_MEDIUM,
+    fontSize: 13,
+    fontWeight: '700',
+    color: COLORS.safe
+  },
+  scanStatsRow: {
+    flexDirection: 'row',
+    marginTop: 14,
+    backgroundColor: COLORS.surfaceSubtle,
+    borderRadius: 16,
+    paddingVertical: 12,
+    alignItems: 'center'
+  },
+  scanStatItem: {
+    flex: 1,
+    alignItems: 'center'
+  },
+  scanStatNumber: {
+    fontFamily: FONT_MEDIUM,
+    fontSize: 18,
+    fontWeight: '800',
+    color: COLORS.text
+  },
+  scanStatLabel: {
+    fontFamily: FONT,
+    fontSize: 10,
+    color: COLORS.t2,
+    marginTop: 2
+  },
+  scanStatDivider: {
+    width: 1,
+    height: 24,
+    backgroundColor: COLORS.surfaceBorder
+  },
+
+  // SCAN COMPLETE SUMMARY
+  summaryPanel: {
+    backgroundColor: COLORS.surface,
+    borderWidth: 1,
+    borderColor: COLORS.surfaceBorder,
+    borderRadius: 24,
+    padding: 18,
+    marginBottom: 16
+  },
+  summaryTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12
+  },
+  summaryCheckCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: COLORS.safeBg,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  summaryCheckGlyph: {
+    color: COLORS.safe,
+    fontSize: 16,
+    fontWeight: '800'
+  },
+  summaryTitle: {
+    color: COLORS.text,
+    fontFamily: FONT_MEDIUM,
+    fontSize: 16,
+    fontWeight: '800'
+  },
+  summarySub: {
+    color: COLORS.t2,
+    fontFamily: FONT,
+    fontSize: 11,
+    marginTop: 2
+  },
+  summaryGrid: {
+    flexDirection: 'row',
+    marginTop: 16,
+    gap: 8
+  },
+  summaryCard: {
+    flex: 1,
+    borderWidth: 1,
+    borderRadius: 18,
+    paddingVertical: 14,
+    alignItems: 'center'
+  },
+  summaryCardNumber: {
+    fontFamily: FONT_MEDIUM,
+    fontSize: 18,
+    fontWeight: '800'
+  },
+  summaryCardLabel: {
+    fontFamily: FONT,
+    fontSize: 10,
+    color: COLORS.t2,
+    marginTop: 4
+  },
+  viewHistoryBtn: {
+    marginTop: 14,
+    backgroundColor: COLORS.surfaceRaised,
+    borderWidth: 1,
+    borderColor: COLORS.surfaceBorder,
+    borderRadius: 999,
+    paddingVertical: 12,
+    alignItems: 'center'
+  },
+  viewHistoryText: {
+    color: COLORS.text,
+    fontFamily: FONT_MEDIUM,
+    fontSize: 13,
+    fontWeight: '700'
+  },
+
+  // "INFORME FINANCIERO" BAR CHART
+  pillBadgeMuted: {
+    backgroundColor: COLORS.surfaceSubtle,
+    borderRadius: 999,
+    paddingHorizontal: 8,
+    paddingVertical: 3
+  },
+  pillBadgeMutedText: {
+    fontFamily: FONT_MEDIUM,
+    fontSize: 9,
+    fontWeight: '700',
+    color: COLORS.t3,
+    letterSpacing: 0.6
+  },
+  chartBarsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'flex-end',
+    height: 110,
+    marginTop: 18
+  },
+  chartCol: {
+    alignItems: 'center',
+    width: 60
+  },
+  chartPercentLabel: {
+    fontFamily: FONT_MEDIUM,
+    fontSize: 11,
+    color: COLORS.t2,
+    marginBottom: 6
+  },
+  chartBarTrack: {
+    width: 32,
+    height: 64,
+    backgroundColor: COLORS.surfaceSubtle,
+    borderRadius: 12,
+    overflow: 'hidden',
+    justifyContent: 'flex-end'
+  },
+  chartBarFill: {
+    width: '100%',
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10
+  },
+  chartBarName: {
+    marginTop: 6,
+    fontFamily: FONT,
+    fontSize: 10,
+    color: COLORS.t3
+  },
+
+  // MANUAL TEXT INPUT
+  input: {
+    marginTop: 12,
+    minHeight: 110,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: COLORS.surfaceBorder,
+    backgroundColor: COLORS.surfaceSubtle,
+    color: COLORS.text,
+    fontFamily: FONT,
+    fontSize: 13,
+    lineHeight: 20,
+    paddingHorizontal: 14,
+    paddingVertical: 12
+  },
+  manualActionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 12
+  },
+  helperText: {
+    color: COLORS.t3,
+    fontFamily: FONT,
+    fontSize: 11
+  },
+  checkButton: {
+    backgroundColor: COLORS.surfaceRaised,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.12)',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 999
+  },
+  checkButtonText: {
+    color: COLORS.text,
+    fontFamily: FONT_MEDIUM,
+    fontSize: 13,
+    fontWeight: '700'
+  },
+  manualResultWrap: {
+    marginTop: 16
+  },
+
+  // 3) HISTORY TAB
+  listContent: {
+    paddingHorizontal: 20,
+    paddingBottom: 120
+  },
+  historySectionHeader: {
+    marginBottom: 16
+  },
+  historySectionTitle: {
+    fontFamily: FONT_MEDIUM,
+    fontSize: 26,
+    fontWeight: '800',
+    color: COLORS.text,
+    letterSpacing: -0.4
+  },
+  historySectionSub: {
+    marginTop: 2,
+    fontFamily: FONT_MEDIUM,
+    fontSize: 10,
+    fontWeight: '700',
+    color: COLORS.t3,
+    letterSpacing: 0.8
+  },
+  historyHeaderChipsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6
+  },
+  historySmallChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 5,
+    borderRadius: 999
+  },
+  chipDot: {
+    width: 5,
+    height: 5,
+    borderRadius: 2.5,
+    marginRight: 4
+  },
+  chipText: {
+    fontFamily: FONT_MEDIUM,
+    fontSize: 10,
+    fontWeight: '700'
+  },
+  clearPillButton: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 999,
+    backgroundColor: COLORS.surface,
+    borderWidth: 1,
+    borderColor: COLORS.surfaceBorder
+  },
+  clearPillText: {
+    fontFamily: FONT_MEDIUM,
+    fontSize: 10,
+    color: COLORS.fraud,
+    fontWeight: '700'
+  },
+
+  // RISK CARD (Workouts item style)
+  card: {
+    backgroundColor: COLORS.surface,
+    borderWidth: 1,
+    borderColor: COLORS.surfaceBorder,
+    borderRadius: 24,
+    padding: 16,
+    marginBottom: 12
+  },
+  cardHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center'
+  },
+  cardAvatarBadge: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative'
+  },
+  cardAvatarGlyph: {
+    fontSize: 16,
+    fontWeight: '800'
+  },
+  pinnedStarBadge: {
+    position: 'absolute',
+    top: -3,
+    right: -3,
+    backgroundColor: COLORS.surfaceSubtle,
+    borderRadius: 8,
+    width: 16,
+    height: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: COLORS.gold
+  },
+  pinnedStarText: {
+    color: COLORS.gold,
+    fontSize: 9,
+    lineHeight: 11
+  },
+  cardCenterCol: {
+    flex: 1,
+    marginLeft: 12
+  },
+  cardSender: {
+    color: COLORS.text,
+    fontFamily: FONT_MEDIUM,
+    fontSize: 15,
+    fontWeight: '700',
+    flex: 1,
+    marginRight: 6
+  },
+  cardDate: {
+    marginTop: 2,
+    color: COLORS.t3,
     fontFamily: FONT,
     fontSize: 10
   },
-  tabs: {
+  cardBodyPreview: {
+    marginTop: 4,
+    color: COLORS.t2,
+    fontFamily: FONT,
+    fontSize: 12,
+    lineHeight: 16
+  },
+  cardMetaChipsRow: {
+    flexDirection: 'row',
+    marginTop: 6,
+    gap: 6
+  },
+  metaChip: {
+    backgroundColor: COLORS.surfaceSubtle,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: COLORS.surfaceBorder
+  },
+  metaChipText: {
+    fontFamily: FONT,
+    fontSize: 10,
+    color: COLORS.t2
+  },
+  riskPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 999,
+    borderWidth: 1
+  },
+  riskPillDot: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    marginRight: 4
+  },
+  riskPillText: {
+    fontFamily: FONT_MEDIUM,
+    fontSize: 10,
+    fontWeight: '700'
+  },
+  chevronWrap: {
+    marginLeft: 8,
+    paddingHorizontal: 4
+  },
+  chevronText: {
+    color: COLORS.t3,
+    fontSize: 16
+  },
+  cardDangerPillRow: {
+    marginTop: 10
+  },
+
+  // DANGER TAG
+  dangerTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.fraudBg,
+    borderWidth: 1,
+    borderColor: COLORS.fraudBorder,
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    alignSelf: 'flex-start'
+  },
+  dangerTagLarge: {
+    paddingHorizontal: 12,
+    paddingVertical: 6
+  },
+  dangerTagDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: COLORS.fraud,
+    marginRight: 6
+  },
+  dangerTagText: {
+    color: COLORS.fraud,
+    fontFamily: FONT_MEDIUM,
+    fontSize: 11,
+    fontWeight: '700'
+  },
+  dangerTagTextLarge: {
+    fontSize: 12
+  },
+
+  // EXPANDED DETAILS
+  detailSection: {
+    marginTop: 14,
+    paddingTop: 14,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.surfaceBorder
+  },
+  dangerRowExpanded: {
+    marginBottom: 10
+  },
+  cardMessageSection: {
+    backgroundColor: COLORS.surfaceSubtle,
+    borderRadius: 16,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: COLORS.surfaceBorder
+  },
+  cardMessageLabel: {
+    fontFamily: FONT_MEDIUM,
+    fontSize: 9,
+    fontWeight: '700',
+    color: COLORS.t3,
+    letterSpacing: 0.8,
+    marginBottom: 4
+  },
+  cardBodyFull: {
+    color: COLORS.text,
+    fontFamily: FONT,
+    fontSize: 13,
+    lineHeight: 19
+  },
+  cardResultSection: {
+    marginTop: 12
+  },
+  cardResultLabel: {
+    fontFamily: FONT_MEDIUM,
+    fontSize: 9,
+    fontWeight: '700',
+    color: COLORS.t3,
+    letterSpacing: 0.8,
+    marginBottom: 6
+  },
+  verdictScoreBarTrack: {
+    height: 4,
+    backgroundColor: COLORS.surfaceSubtle,
+    borderRadius: 999,
+    overflow: 'hidden',
+    marginBottom: 8
+  },
+  verdictScoreBarFill: {
+    height: '100%',
+    borderRadius: 999
+  },
+  inlineMetaRow: {
+    flexDirection: 'row',
+    alignItems: 'center'
+  },
+  inlineMetaLabel: {
+    color: COLORS.t2,
+    fontFamily: FONT,
+    fontSize: 12,
+    marginRight: 6
+  },
+  inlineMetaValue: {
+    fontFamily: FONT_MEDIUM,
+    fontSize: 12,
+    fontWeight: '700'
+  },
+  explanationSection: {
+    marginTop: 8
+  },
+  detailHeading: {
+    color: COLORS.text,
+    fontFamily: FONT_MEDIUM,
+    fontSize: 12,
+    fontWeight: '700',
+    marginBottom: 4,
+    marginTop: 10
+  },
+  detailText: {
+    color: COLORS.t2,
+    fontFamily: FONT,
+    fontSize: 12,
+    lineHeight: 18
+  },
+  bulletRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginTop: 4
+  },
+  bulletDot: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    marginTop: 7,
+    marginRight: 8
+  },
+  detailBulletText: {
+    flex: 1,
+    color: COLORS.t2,
+    fontFamily: FONT,
+    fontSize: 12,
+    lineHeight: 18
+  },
+  confidenceText: {
+    marginTop: 10,
+    color: COLORS.t3,
+    fontFamily: FONT,
+    fontSize: 11
+  },
+  actionRow: {
     marginTop: 14,
     flexDirection: 'row',
-    paddingHorizontal: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.border
+    gap: 8
   },
+  actionButton: {
+    flex: 1,
+    backgroundColor: COLORS.surfaceSubtle,
+    borderWidth: 1,
+    borderColor: COLORS.surfaceBorder,
+    borderRadius: 999,
+    paddingVertical: 10,
+    alignItems: 'center'
+  },
+  actionButtonText: {
+    color: COLORS.text,
+    fontFamily: FONT_MEDIUM,
+    fontSize: 12,
+    fontWeight: '700'
+  },
+  actionButtonDelete: {
+    flex: 1,
+    backgroundColor: COLORS.fraudBg,
+    borderWidth: 1,
+    borderColor: COLORS.fraudBorder,
+    borderRadius: 999,
+    paddingVertical: 10,
+    alignItems: 'center'
+  },
+  actionButtonDeleteText: {
+    color: COLORS.fraud,
+    fontFamily: FONT_MEDIUM,
+    fontSize: 12,
+    fontWeight: '700'
+  },
+
+  // 5) FLOATING BOTTOM NAVIGATION BAR (The Outsiders / Workouts pill bar)
+  bottomNavContainer: {
+    position: 'absolute',
+    bottom: Platform.OS === 'android' ? 24 : 34,
+    left: 20,
+    right: 20,
+    alignItems: 'center'
+  },
+  floatingNavBar: {
+    flexDirection: 'row',
+    backgroundColor: 'rgba(26, 26, 29, 0.94)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+    borderRadius: 32,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.5,
+    shadowRadius: 20,
+    elevation: 10
+  },
+  floatingTabItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 24
+  },
+  floatingTabItemActive: {
+    backgroundColor: 'rgba(255, 255, 255, 0.09)'
+  },
+  tabIconShape: {
+    marginRight: 6,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  tabIconRadarCircle: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    borderWidth: 1.8,
+    borderColor: COLORS.t3
+  },
+  tabIconListLine: {
+    width: 12,
+    height: 2,
+    backgroundColor: COLORS.t3,
+    borderRadius: 1,
+    marginVertical: 1
+  },
+  tabStarGlyph: {
+    fontSize: 13,
+    color: COLORS.t3
+  },
+  floatingTabLabel: {
+    color: COLORS.t3,
+    fontFamily: FONT_MEDIUM,
+    fontSize: 13,
+    fontWeight: '600'
+  },
+  floatingTabLabelActive: {
+    color: COLORS.text,
+    fontWeight: '700'
+  },
+  tabBadge: {
+    marginLeft: 6,
+    backgroundColor: COLORS.fraudBg,
+    paddingHorizontal: 6,
+    paddingVertical: 1.5,
+    borderRadius: 999
+  },
+  tabBadgeText: {
+    fontFamily: FONT_MEDIUM,
+    fontSize: 9,
+    color: COLORS.fraud,
+    fontWeight: '700'
+  },
+
+  // EMPTY STATE
+  emptyState: {
+    marginTop: 60,
+    alignItems: 'center',
+    paddingHorizontal: 30
+  },
+  emptyIconCircle: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: COLORS.surfaceSubtle,
+    borderWidth: 1,
+    borderColor: COLORS.surfaceBorder,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 14
+  },
+  emptyShieldGlyph: {
+    width: 18,
+    height: 22,
+    borderRadius: 5,
+    borderWidth: 2,
+    borderColor: COLORS.t3
+  },
+  emptyTitle: {
+    color: COLORS.text,
+    fontFamily: FONT_MEDIUM,
+    fontSize: 16,
+    fontWeight: '700'
+  },
+  emptySubtitle: {
+    marginTop: 6,
+    color: COLORS.t3,
+    fontFamily: FONT,
+    fontSize: 12,
+    textAlign: 'center',
+    lineHeight: 18
+  },
+
+  // OLD TABS (Kept for backward compatibility if ever called)
   tabButton: {
     flex: 1,
     alignItems: 'center',
@@ -906,427 +2258,15 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent'
   },
   tabUnderlineActive: {
-    backgroundColor: COLORS.accent
+    backgroundColor: COLORS.safe
   },
-  scrollContent: {
-    padding: 20,
-    paddingBottom: 70
-  },
-  panel: {
-    backgroundColor: COLORS.surface,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    padding: 14,
-    marginBottom: 14
-  },
-  panelTitle: {
-    color: COLORS.text,
-    fontFamily: FONT,
-    fontSize: 14,
-    fontWeight: '800'
-  },
-  panelSub: {
-    color: COLORS.t2,
-    fontFamily: FONT,
-    fontSize: 11,
-    marginTop: 4
-  },
-  rowBetween: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between'
-  },
-  rowBetweenTop: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between'
-  },
-  flexOne: {
-    flex: 1
-  },
-  scanButton: {
-    backgroundColor: COLORS.accent,
-    borderRadius: 16,
-    paddingVertical: 18,
-    paddingHorizontal: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: COLORS.accent,
-    shadowOpacity: 0.2,
-    shadowRadius: 14,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 4,
-    marginBottom: 14
-  },
-  scanButtonText: {
-    color: '#02261a',
-    fontFamily: FONT,
-    fontSize: 17,
-    fontWeight: '900'
-  },
-  scanButtonSub: {
-    marginTop: 5,
-    color: '#033528',
-    fontFamily: FONT,
-    fontSize: 11,
-    fontWeight: '700'
-  },
-  progressWrap: {
-    marginBottom: 14
-  },
-  progressTrack: {
-    height: 10,
-    backgroundColor: COLORS.s3,
-    borderRadius: 999,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: COLORS.border
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: COLORS.accent
-  },
-  progressText: {
-    marginTop: 7,
-    color: COLORS.t2,
-    fontFamily: FONT,
-    fontSize: 11
-  },
-  input: {
-    marginTop: 12,
-    minHeight: 118,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    backgroundColor: COLORS.s2,
-    color: COLORS.text,
-    fontFamily: FONT,
-    fontSize: 13,
-    paddingHorizontal: 12,
-    paddingVertical: 12
-  },
-  helperText: {
-    color: COLORS.t3,
-    fontFamily: FONT,
-    fontSize: 11,
-    marginTop: 10
-  },
-  checkButton: {
-    marginTop: 10,
-    backgroundColor: COLORS.accent,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 10
-  },
-  checkButtonText: {
-    color: '#02261a',
-    fontFamily: FONT,
-    fontSize: 12,
-    fontWeight: '900'
-  },
-  manualResultWrap: {
-    marginTop: 14
-  },
-  listContent: {
-    padding: 20,
-    paddingBottom: 70
-  },
-  historyHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 12
-  },
-  historyHeaderText: {
-    color: COLORS.t2,
-    fontFamily: FONT,
-    fontSize: 12
-  },
-  clearText: {
-    color: '#fca5a5',
-    fontFamily: FONT,
-    fontSize: 12,
-    fontWeight: '800'
-  },
-  emptyState: {
-    marginTop: 80,
-    alignItems: 'center',
-    paddingHorizontal: 20
-  },
-  emptyTitle: {
-    color: COLORS.text,
-    fontFamily: FONT,
-    fontSize: 15,
-    fontWeight: '800'
-  },
-  emptySubtitle: {
-    marginTop: 8,
-    color: COLORS.t2,
-    fontFamily: FONT,
-    fontSize: 11,
-    textAlign: 'center',
-    lineHeight: 17
-  },
-  card: {
-    borderWidth: 1,
-    borderRadius: 16,
-    padding: 14,
-    marginBottom: 12
-  },
-  cardSender: {
-    color: COLORS.text,
-    fontFamily: FONT,
-    fontSize: 14,
-    fontWeight: '800'
-  },
-  cardDate: {
-    marginTop: 4,
-    color: COLORS.t3,
-    fontFamily: FONT,
-    fontSize: 10
-  },
-  riskChip: {
-    borderWidth: 1,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 999,
-    marginLeft: 10
-  },
-  riskChipText: {
-    fontFamily: FONT,
-    fontSize: 11,
-    fontWeight: '800'
-  },
-  dangerRow: {
-    marginTop: 10,
-    alignItems: 'flex-start'
-  },
-  dangerTag: {
-    backgroundColor: COLORS.red,
-    borderRadius: 999,
-    paddingHorizontal: 10,
-    paddingVertical: 5
-  },
-  dangerTagLarge: {
-    paddingHorizontal: 12,
-    paddingVertical: 8
-  },
-  dangerTagText: {
-    color: COLORS.white,
-    fontFamily: FONT,
-    fontSize: 11,
-    fontWeight: '900'
-  },
-  dangerTagTextLarge: {
-    fontSize: 13
-  },
-  cardBody: {
-    marginTop: 10,
-    color: COLORS.text,
-    fontFamily: FONT,
-    fontSize: 12,
-    lineHeight: 18
-  },
-  inlineMetaRow: {
-    marginTop: 10,
-    flexDirection: 'row',
-    flexWrap: 'wrap'
-  },
-  inlineMetaLabel: {
-    color: COLORS.t2,
-    fontFamily: FONT,
-    fontSize: 11,
-    marginRight: 6
-  },
-  inlineMetaValue: {
-    fontFamily: FONT,
-    fontSize: 11,
-    fontWeight: '800'
-  },
-  detailSection: {
-    marginTop: 12,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: COLORS.border
-  },
-  detailHeading: {
-    color: COLORS.accent,
-    fontFamily: FONT,
-    fontSize: 11,
-    fontWeight: '900',
-    marginBottom: 6,
-    marginTop: 6
-  },
-  detailText: {
-    color: COLORS.text,
-    fontFamily: FONT,
-    fontSize: 12,
-    lineHeight: 18
-  },
-  detailBullet: {
-    color: COLORS.text,
-    fontFamily: FONT,
-    fontSize: 12,
-    lineHeight: 18,
-    marginBottom: 2
-  },
-  confidenceText: {
-    marginTop: 10,
-    color: COLORS.t2,
-    fontFamily: FONT,
-    fontSize: 11
-  },
-  actionRow: {
-    marginTop: 12,
-    flexDirection: 'row',
-    gap: 10
-  },
-  actionButton: {
-    backgroundColor: COLORS.s2,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 8
-  },
-  actionButtonText: {
-    color: COLORS.text,
-    fontFamily: FONT,
-    fontSize: 11,
-    fontWeight: '800'
-  },
+
+  // UTILITY STATES
   scalePressed: {
-    transform: [{ scale: 0.985 }]
+    transform: [{ scale: 0.97 }]
   },
   dimmed: {
-    opacity: 0.6
-  },
-  scanStatsRow: {
-    flexDirection: 'row',
-    marginTop: 12,
-    backgroundColor: COLORS.surface,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    paddingVertical: 10,
-    alignItems: 'stretch'
-  },
-  scanStatItem: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  scanStatNumber: {
-    fontFamily: FONT,
-    fontSize: 20,
-    fontWeight: '900',
-    color: COLORS.text
-  },
-  scanStatLabel: {
-    fontFamily: FONT,
-    fontSize: 10,
-    color: COLORS.t2,
-    marginTop: 3
-  },
-  scanStatDivider: {
-    width: 1,
-    backgroundColor: COLORS.border
-  },
-  summaryPanel: {
-    backgroundColor: COLORS.surface,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 14
-  },
-  summaryTitle: {
-    color: COLORS.text,
-    fontFamily: FONT,
-    fontSize: 16,
-    fontWeight: '900'
-  },
-  summarySub: {
-    color: COLORS.t2,
-    fontFamily: FONT,
-    fontSize: 11,
-    marginTop: 4
-  },
-  summaryGrid: {
-    flexDirection: 'row',
-    marginTop: 12,
-    gap: 8
-  },
-  summaryCard: {
-    flex: 1,
-    backgroundColor: COLORS.s2,
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingVertical: 12,
-    alignItems: 'center'
-  },
-  summaryCardNumber: {
-    fontFamily: FONT,
-    fontSize: 18,
-    fontWeight: '900'
-  },
-  summaryCardLabel: {
-    fontFamily: FONT,
-    fontSize: 10,
-    color: COLORS.t2,
-    marginTop: 4
-  },
-  viewHistoryBtn: {
-    marginTop: 12,
-    backgroundColor: COLORS.accent,
-    borderRadius: 10,
-    paddingVertical: 10,
-    alignItems: 'center'
-  },
-  viewHistoryText: {
-    color: '#02261a',
-    fontFamily: FONT,
-    fontSize: 13,
-    fontWeight: '900'
-  },
-  historyStatsRow: {
-    flexDirection: 'row',
-    gap: 8,
-    marginBottom: 14
-  },
-  historyStatBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 999
-  },
-  historyStatBadgeText: {
-    fontFamily: FONT,
-    fontSize: 11,
-    fontWeight: '800'
-  },
-  cardMessageSection: {
-    marginTop: 10,
-    backgroundColor: COLORS.s3,
-    borderRadius: 10,
-    padding: 10
-  },
-  cardMessageLabel: {
-    fontFamily: FONT,
-    fontSize: 10,
-    fontWeight: '800',
-    color: COLORS.t2,
-    marginBottom: 4
-  },
-  cardResultSection: {
-    marginTop: 8
-  },
-  cardResultLabel: {
-    fontFamily: FONT,
-    fontSize: 10,
-    fontWeight: '800',
-    color: COLORS.accent,
-    marginBottom: 4
+    opacity: 0.5
   }
 });
 

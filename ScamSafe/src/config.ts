@@ -20,7 +20,7 @@ export const AI_PROVIDER: AIProvider = 'groq';
 // 🔑 SET YOUR GROQ API KEY HERE
 // Create a free key at: https://console.groq.com/keys (starts with gsk_...)
 // ============================================================
-export const GROQ_API_KEY: string = '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';
+export const GROQ_API_KEY: string = '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';
 
 // Groq Model options:
 // - 'llama-3.3-70b-versatile' : Best reasoning & highest scam detection accuracy (Recommended)

@@ -1,0 +1,23 @@
+{
+  "name": "ScamSafe — Fraud Detector",
+  "short_name": "ScamSafe",
+  "description": "Instantly detect scam messages, UPI fraud & phishing. Free, no login.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0f",
+  "theme_color": "#00e5a0",
+  "orientation": "portrait",
+  "categories": ["finance", "security", "utilities"],
+  "share_target": {
+    "action": "/share",
+    "method": "GET",
+    "params": { "text": "text", "title": "title", "url": "url" }
+  },
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ],
+  "screenshots": [
+    { "src": "/screenshot.png", "sizes": "390x844", "type": "image/png" }
+  ]
+}
