@@ -6,7 +6,13 @@
   "scripts": {
     "start": "expo start",
     "android": "expo run:android",
-    "prebuild": "expo prebuild --platform android --clean"
+    "prebuild": "expo prebuild --platform android --clean",
+    "typecheck": "tsc --noEmit",
+    "build:test": "tsc -p tsconfig.test.json",
+    "test:unit": "npm run build:test && node --test test/unit/trust.test.js test/unit/redaction.test.js test/unit/parse.test.js test/unit/storage.test.js test/unit/cloud.test.js test/unit/rules.test.js test/unit/consent.test.js backend/analyze.test.js",
+    "bench": "npm run build:test && node run_benchmark_200.js",
+    "holdout": "npm run build:test && node scripts/run_holdout.js",
+    "test": "npm run test:unit && node run_benchmark_200.js"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.2.0",

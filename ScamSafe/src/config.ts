@@ -1,34 +1,20 @@
 /**
- * ScamSafe AI Configuration
+ * ScamSafe configuration.
  *
- * Groq is 100% FREE, extremely fast (LPU inference), and requires no credit card.
- * Get your free Groq API key in 30 seconds at: https://console.groq.com/keys
+ * IMPORTANT: no AI provider key may ever live in this app. The optional cloud check
+ * goes through our own backend (see backend/analyze.js), which holds the provider key
+ * as a server-side secret.
  */
 
-export type AIProvider = 'groq' | 'gemini' | 'openai' | 'offline';
+// URL of the deployed backend, e.g. 'https://scamsafe-analyze.<account>.workers.dev'.
+// Leave EMPTY to ship the on-device engine only: in that case no text ever leaves the phone.
+export const ANALYZE_URL: string = 'https://scamsafe-analyze.scam-safe.workers.dev';
 
-// ============================================================
-// ⚙️ CHOOSE YOUR AI PROVIDER:
-// 'groq'   -> Recommended (Free, ultra-fast, handles 10+ msgs effortlessly)
-// 'gemini' -> Free tier via Google AI Studio
-// 'openai' -> Requires paid OpenAI account
-// 'offline'-> Uses built-in rule engine (works offline without any API key)
-// ============================================================
-export const AI_PROVIDER: AIProvider = 'groq';
+// Link opened by Settings -> "Privacy policy". Replace with the hosted PRIVACY_POLICY.md.
+export const PRIVACY_URL: string = 'https://example.com/scamsafe/privacy';
 
-// ============================================================
-// 🔑 SET YOUR GROQ API KEY HERE
-// Create a free key at: https://console.groq.com/keys (starts with gsk_...)
-// ============================================================
-export const GROQ_API_KEY: string = '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';
+// Cloud call limits. The backend enforces the same max length independently.
+export const ANALYZE_TIMEOUT_MS = 10_000;
+export const ANALYZE_MAX_CHARS = 1000;
 
-// Groq Model options:
-// - 'llama-3.3-70b-versatile' : Best reasoning & highest scam detection accuracy (Recommended)
-// - 'llama-3.1-8b-instant'     : Ultra-low latency (~200ms per message)
-export const GROQ_MODEL = 'llama-3.3-70b-versatile';
-
-// ============================================================
-// (Optional) Other Provider Keys:
-// ============================================================
-export const GEMINI_API_KEY: string = '';
-export const OPENAI_API_KEY: string = '';
+export const CLOUD_ENABLED: boolean = ANALYZE_URL.trim().length > 0;

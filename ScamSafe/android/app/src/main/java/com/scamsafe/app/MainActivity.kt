@@ -1,4 +1,4 @@
-package com.anonymous.ScamSafe
+package com.scamsafe.app
 
 import android.os.Build
 import android.os.Bundle

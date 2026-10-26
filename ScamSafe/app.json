@@ -6,19 +6,31 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
-    "platforms": ["android"],
+    "platforms": [
+      "android"
+    ],
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#050508"
     },
     "android": {
-      "package": "com.anonymous.ScamSafe",
-      "permissions": ["android.permission.READ_SMS", "android.permission.RECEIVE_SMS"],
+      "package": "com.scamsafe.app",
+      "permissions": [
+        "android.permission.READ_SMS",
+        "android.permission.RECEIVE_SMS"
+      ],
       "adaptiveIcon": {
         "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#050508"
-      }
-    }
+      },
+      "allowBackup": false,
+      "blockedPermissions": [
+        "android.permission.SYSTEM_ALERT_WINDOW"
+      ]
+    },
+    "plugins": [
+      "./plugins/withReleaseSigning"
+    ]
   }
 }

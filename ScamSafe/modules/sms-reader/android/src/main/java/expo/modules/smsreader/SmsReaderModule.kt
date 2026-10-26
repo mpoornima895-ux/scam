@@ -167,10 +167,10 @@ class SmsReaderModule : Module() {
 
     try {
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        context.registerReceiver(broadcastReceiver, filter, Context.RECEIVER_EXPORTED)
+        context.registerReceiver(broadcastReceiver, filter, "android.permission.BROADCAST_SMS", null, Context.RECEIVER_EXPORTED)
       } else {
         @Suppress("DEPRECATION")
-        context.registerReceiver(broadcastReceiver, filter)
+        context.registerReceiver(broadcastReceiver, filter, "android.permission.BROADCAST_SMS", null)
       }
       receiver = broadcastReceiver
     } catch (_: Exception) {

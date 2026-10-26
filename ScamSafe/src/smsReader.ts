@@ -24,7 +24,8 @@ export async function readRecentSms(days: number, limit: number): Promise<SmsMes
       normalized.push({ id, address, body, date });
     }
     return normalized;
-  } catch {
+  } catch (error) {
+    console.warn('[ScamSafe SMS] Failed reading recent SMS:', error);
     return [];
   }
 }
@@ -45,12 +46,14 @@ export function subscribeToIncomingSms(callback: (message: SmsMessage) => void):
           return;
         }
         callback({ id, address, body, date });
-      } catch {
+      } catch (err) {
+        console.warn('[ScamSafe SMS] Error parsing incoming SMS payload:', err);
       }
     });
 
     return typeof unsubscribe === 'function' ? unsubscribe : () => {};
-  } catch {
+  } catch (error) {
+    console.warn('[ScamSafe SMS] Failed to subscribe to incoming SMS:', error);
     return () => {};
   }
 }

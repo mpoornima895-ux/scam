@@ -1,0 +1,1209 @@
+{
+  "version": "1.0.0",
+  "description": "ScamSafe DEVELOPMENT set: 200 messages written by the developer (100 scam-style + 100 genuine-style). A regression check, NOT proof of accuracy.",
+  "totalMessages": 200,
+  "scamCount": 100,
+  "genuineCount": 100,
+  "messages": [
+    {
+      "id": "S-001",
+      "category": "UPI PIN Theft",
+      "text": "You have received Rs 25,000 from PhonePe. Enter your UPI PIN to accept payment in your bank account.",
+      "expected": "High"
+    },
+    {
+      "id": "S-002",
+      "category": "UPI PIN Theft",
+      "text": "GPay Alert: Rs 15,000 cashback pending. Enter your 6 digit UPI PIN to credit money into your SBI account.",
+      "expected": "High"
+    },
+    {
+      "id": "S-003",
+      "category": "UPI PIN Theft",
+      "text": "Paytm user! Your refund of Rs 4,999 is approved. Accept money by entering UPI PIN on the link.",
+      "expected": "High"
+    },
+    {
+      "id": "S-004",
+      "category": "UPI PIN Theft",
+      "text": "Aapke khate me 5000 rupaye transfer kiye gaye hain. Paisa receive karne ke liye turant UPI PIN daalein.",
+      "expected": "High"
+    },
+    {
+      "id": "S-005",
+      "category": "UPI PIN Theft",
+      "text": "Dear Customer, PhonePe gift voucher of Rs 3,000 received. Type UPI PIN to claim reward directly into wallet.",
+      "expected": "High"
+    },
+    {
+      "id": "S-006",
+      "category": "UPI PIN Theft",
+      "text": "BHIM UPI: Money request from OLX Buyer for Rs 12,000. Enter UPI PIN to receive money in bank.",
+      "expected": "High"
+    },
+    {
+      "id": "S-007",
+      "category": "UPI PIN Theft",
+      "text": "Rs 8,500 credited to your account. To accept payment, approve collect request on Google Pay using PIN.",
+      "expected": "High"
+    },
+    {
+      "id": "S-008",
+      "category": "UPI PIN Theft",
+      "text": "Cashback won! Rs 2,000 waiting in PhonePe. Open app and enter your UPI PIN to get cashback credited.",
+      "expected": "High"
+    },
+    {
+      "id": "S-009",
+      "category": "UPI PIN Theft",
+      "text": "Bank notice: Inward remittance of Rs 45,000 on hold. Enter UPI PIN on http://upi-verify.top to receive.",
+      "expected": "High"
+    },
+    {
+      "id": "S-010",
+      "category": "UPI PIN Theft",
+      "text": "Paisa receive karne ke liye UPI PIN enter karein aur turant balance check karein.",
+      "expected": "High"
+    },
+    {
+      "id": "S-011",
+      "category": "UPI PIN Theft",
+      "text": "Your Paytm payment request of Rs 1,500 is ready. Type PIN to credit money into bank account.",
+      "expected": "High"
+    },
+    {
+      "id": "S-012",
+      "category": "UPI PIN Theft",
+      "text": "Cred alert: Rs 5,000 cashback won. Accept money on PhonePe by submitting your UPI PIN.",
+      "expected": "High"
+    },
+    {
+      "id": "S-013",
+      "category": "UPI PIN Theft",
+      "text": "OLX deal: Buyer sent Rs 10,000 via QR code. Scan QR and enter UPI PIN to receive payment in your account.",
+      "expected": "High"
+    },
+    {
+      "id": "S-014",
+      "category": "UPI PIN Theft",
+      "text": "PhonePe reward: You won scratch card of Rs 7,777. Enter UPI PIN to credit cash into savings a/c.",
+      "expected": "High"
+    },
+    {
+      "id": "S-015",
+      "category": "UPI PIN Theft",
+      "text": "Amazon Pay: Rs 3,500 bonus added. Input UPI PIN to accept payment in bank.",
+      "expected": "High"
+    },
+    {
+      "id": "S-016",
+      "category": "Electricity Extortion",
+      "text": "Dear customer electricity power will be disconnected tonight at 9.30 PM from electricity office. Immediately call electricity officer 9812345678.",
+      "expected": "High"
+    },
+    {
+      "id": "S-017",
+      "category": "Electricity Extortion",
+      "text": "Urgent notice: Your electricity connection will be cut off today at 8:30 PM due to unpaid bill. Contact officer at 8765432109.",
+      "expected": "High"
+    },
+    {
+      "id": "S-018",
+      "category": "Electricity Extortion",
+      "text": "Bijli bill not updated. Power will be disconnected tonight. Call electricity helpline 9123456780 immediately.",
+      "expected": "High"
+    },
+    {
+      "id": "S-019",
+      "category": "Electricity Extortion",
+      "text": "Electricity Board alert: Last month bill not received. Supply cut tonight 10:00 PM. Call officer 9456781230.",
+      "expected": "High"
+    },
+    {
+      "id": "S-020",
+      "category": "Electricity Extortion",
+      "text": "Bijli connection kat diya jayega aaj raat 9 baje. Bill update karne ke liye officer ko call karein 9871234560.",
+      "expected": "High"
+    },
+    {
+      "id": "S-021",
+      "category": "Electricity Extortion",
+      "text": "Power department: Immediate disconnection order issued for meter #49281. Call executive 7890123456.",
+      "expected": "High"
+    },
+    {
+      "id": "S-022",
+      "category": "Electricity Extortion",
+      "text": "BSES Notice: Bill payment failed. Power cut scheduled within 2 hours. Update immediately via 9654321098.",
+      "expected": "High"
+    },
+    {
+      "id": "S-023",
+      "category": "Electricity Extortion",
+      "text": "MSEDCL: Your power connection will be cut off tonight. Call electrical officer 9321098765.",
+      "expected": "High"
+    },
+    {
+      "id": "S-024",
+      "category": "Electricity Extortion",
+      "text": "BESCOM: Power supply will be disconnected at 9:30 PM. Call officer 8123456789 to update meter bill.",
+      "expected": "High"
+    },
+    {
+      "id": "S-025",
+      "category": "Electricity Extortion",
+      "text": "DHBVN Warning: Electricity power disconnected tonight 9:00 PM. Call officer 9234567891 immediately.",
+      "expected": "High"
+    },
+    {
+      "id": "S-026",
+      "category": "Electricity Extortion",
+      "text": "Torrent Power: Unpaid bill pending. Disconnection in progress. Call official 9811223344.",
+      "expected": "High"
+    },
+    {
+      "id": "S-027",
+      "category": "Electricity Extortion",
+      "text": "TNEB alert: Power will be disconnected today. Please contact electricity officer 9444123456 to clear dues.",
+      "expected": "High"
+    },
+    {
+      "id": "S-028",
+      "category": "Electricity Extortion",
+      "text": "Dear Consumer, electricity connection will be cut off today at 9:30 PM. Download support APK: http://bijli-bill.xyz/app.apk",
+      "expected": "High"
+    },
+    {
+      "id": "S-029",
+      "category": "Electricity Extortion",
+      "text": "Electricity office: Meter line cut today. Call officer 8877665544 to avoid fine and disconnection.",
+      "expected": "High"
+    },
+    {
+      "id": "S-030",
+      "category": "Electricity Extortion",
+      "text": "Bijli connection kat jayega. Turant officer se baat karein 9711223344 nahi to line band kar di jayegi.",
+      "expected": "High"
+    },
+    {
+      "id": "S-031",
+      "category": "Bank Phishing / APK",
+      "text": "Dear SBI customer, your YONO account is blocked today. Update PAN immediately to unblock: https://sbi-kyc-update.top/sbi.apk",
+      "expected": "High"
+    },
+    {
+      "id": "S-032",
+      "category": "Bank Phishing / APK",
+      "text": "HDFC Bank: Your NetBanking account will be suspended within 24 hours. Update KYC now: https://hdfc-netbanking.online/login",
+      "expected": "High"
+    },
+    {
+      "id": "S-033",
+      "category": "Bank Phishing / APK",
+      "text": "ICICI Bank Alert: Your debit card is deactivated due to PAN card expiry. Update here: https://icici-pan.click",
+      "expected": "High"
+    },
+    {
+      "id": "S-034",
+      "category": "Bank Phishing / APK",
+      "text": "Dear customer, your bank a/c will be closed today. Download customer-care app to verify KYC: http://bank-kyc.site/app.apk",
+      "expected": "High"
+    },
+    {
+      "id": "S-035",
+      "category": "Bank Phishing / APK",
+      "text": "PNB User: Your account is suspended. Link Aadhaar immediately to resume services: https://pnb-verify.buzz",
+      "expected": "High"
+    },
+    {
+      "id": "S-036",
+      "category": "Bank Phishing / APK",
+      "text": "Axis Bank: 5,000 reward points expiring today. Redeem for cash Rs 5,000 here: https://axis-rewards.xyz/redeem",
+      "expected": "High"
+    },
+    {
+      "id": "S-037",
+      "category": "Bank Phishing / APK",
+      "text": "SBI YONO: Important update required. Install our support app immediately: https://sbi-yono.top/update.apk",
+      "expected": "High"
+    },
+    {
+      "id": "S-038",
+      "category": "Bank Phishing / APK",
+      "text": "Kotak 811: Account blocked due to incomplete KYC verification. Click to update: https://kotak-kyc.work",
+      "expected": "High"
+    },
+    {
+      "id": "S-039",
+      "category": "Bank Phishing / APK",
+      "text": "Aapka bank khata block kar diya gaya hai. Turant PAN card link karein https://bank-pan.link",
+      "expected": "High"
+    },
+    {
+      "id": "S-040",
+      "category": "Bank Phishing / APK",
+      "text": "Bank of Baroda: Your account is frozen due to non-KYC. Call customer care 9823456710 or click https://bob-kyc.top",
+      "expected": "High"
+    },
+    {
+      "id": "S-041",
+      "category": "Bank Phishing / APK",
+      "text": "Canara Bank: Netbanking disabled. Update PAN card now on https://canara-pan.site to avoid account closure.",
+      "expected": "High"
+    },
+    {
+      "id": "S-042",
+      "category": "Bank Phishing / APK",
+      "text": "Union Bank: Immediate action required. Your debit card is blocked. Download update app: http://union-bank.space/card.apk",
+      "expected": "High"
+    },
+    {
+      "id": "S-043",
+      "category": "Bank Phishing / APK",
+      "text": "SBI Alert: YONO points worth Rs 9,850 ready to redeem in savings account. Click http://sbi-cash.xyz",
+      "expected": "High"
+    },
+    {
+      "id": "S-044",
+      "category": "Bank Phishing / APK",
+      "text": "Dear customer your credit card limit increased to Rs 5 Lakhs. Accept by downloading app: http://card-limit.online/app.apk",
+      "expected": "High"
+    },
+    {
+      "id": "S-045",
+      "category": "Bank Phishing / APK",
+      "text": "Bank KYC expired. Account will be blocked in 24 hours. Call officer at 9988776655 to update.",
+      "expected": "High"
+    },
+    {
+      "id": "S-046",
+      "category": "Job / Task Scam",
+      "text": "Earn Rs 5000 daily from home, part time job on telegram, like youtube videos and get paid.",
+      "expected": "High"
+    },
+    {
+      "id": "S-047",
+      "category": "Job / Task Scam",
+      "text": "Part time job work from home! Earn Rs 3,000 to 8,000 per day by rating hotels. Contact HR on WhatsApp: https://wa.me/919876543210",
+      "expected": "High"
+    },
+    {
+      "id": "S-048",
+      "category": "Job / Task Scam",
+      "text": "Amazon hiring part-time review staff. Salary Rs 2,500 daily. Just 30 mins work from mobile. Join Telegram: t.me/amazon_job",
+      "expected": "High"
+    },
+    {
+      "id": "S-049",
+      "category": "Job / Task Scam",
+      "text": "Earn income Rs 4000 per day! Work from home on mobile. Like YouTube videos and earn cash. Message on Telegram @hr_priya",
+      "expected": "High"
+    },
+    {
+      "id": "S-050",
+      "category": "Job / Task Scam",
+      "text": "Ghar baithe kamayein Rs 3000 daily. Part time job mobile par. Contact on Telegram t.me/task_earn",
+      "expected": "High"
+    },
+    {
+      "id": "S-051",
+      "category": "Job / Task Scam",
+      "text": "Hiring students & housewives. Earn Rs 1,500 per hour. Simple typing work. Join telegram task channel now.",
+      "expected": "High"
+    },
+    {
+      "id": "S-052",
+      "category": "Job / Task Scam",
+      "text": "Daily payout Rs 5,000! Work from home for Flipkart review team. Immediate joining. Telegram: @flipkart_hire",
+      "expected": "High"
+    },
+    {
+      "id": "S-053",
+      "category": "Job / Task Scam",
+      "text": "Earn Rs 2000 per day by liking videos on Instagram. No investment needed. Contact on WhatsApp 9812345678.",
+      "expected": "High"
+    },
+    {
+      "id": "S-054",
+      "category": "Job / Task Scam",
+      "text": "Part-time data entry job. Earn Rs 25,000 weekly from home. Deposit Rs 500 registration fee to start.",
+      "expected": "High"
+    },
+    {
+      "id": "S-055",
+      "category": "Job / Task Scam",
+      "text": "Earn Rs 6000 daily from home by testing apps. Contact on Telegram t.me/app_tester_jobs",
+      "expected": "High"
+    },
+    {
+      "id": "S-056",
+      "category": "Job / Task Scam",
+      "text": "Part time job on telegram: Subscribe to YouTube channels and get Rs 50 per subscribe. Daily earn Rs 3500.",
+      "expected": "High"
+    },
+    {
+      "id": "S-057",
+      "category": "Job / Task Scam",
+      "text": "Make money online! Rs 4500 daily income from home. Contact HR manager on Telegram t.me/daily_task_payout",
+      "expected": "High"
+    },
+    {
+      "id": "S-058",
+      "category": "Job / Task Scam",
+      "text": "Google Maps review job: Earn Rs 150 per review, earn Rs 3,000 daily. Contact via Telegram @review_job_india",
+      "expected": "High"
+    },
+    {
+      "id": "S-059",
+      "category": "Job / Task Scam",
+      "text": "Part time work from home. Daily salary Rs 5000 in bank. WhatsApp us at 9123456789 for immediate start.",
+      "expected": "High"
+    },
+    {
+      "id": "S-060",
+      "category": "Job / Task Scam",
+      "text": "Rojana 5000 rupaye kamayein mobile se. Part time job ghar baithe. Telegram par task complete karein.",
+      "expected": "High"
+    },
+    {
+      "id": "S-061",
+      "category": "Digital Arrest",
+      "text": "FedEx: Your parcel with narcotics & illegal passport is seized by customs. Mumbai crime branch has issued digital arrest warrant.",
+      "expected": "High"
+    },
+    {
+      "id": "S-062",
+      "category": "Digital Arrest",
+      "text": "CBI Crime Branch: Digital arrest warrant issued against you for money laundering. Connect immediately to avoid physical arrest.",
+      "expected": "High"
+    },
+    {
+      "id": "S-063",
+      "category": "Digital Arrest",
+      "text": "Customs Officer: A parcel sent in your name containing 200g contraband drugs has been seized at Delhi airport. Arrest warrant issued.",
+      "expected": "High"
+    },
+    {
+      "id": "S-064",
+      "category": "Digital Arrest",
+      "text": "Mumbai Police Cyber Crime: Your Aadhaar is linked to terrorist financing accounts. Digital arrest order initiated. Contact investigator.",
+      "expected": "High"
+    },
+    {
+      "id": "S-065",
+      "category": "Digital Arrest",
+      "text": "DHL Express: Contraband goods seized in package tracking #DHL99281. Narcotics control bureau has issued legal notice.",
+      "expected": "High"
+    },
+    {
+      "id": "S-066",
+      "category": "Digital Arrest",
+      "text": "Telecom Regulatory Authority (TRAI): All mobile numbers under your ID will be disconnected in 2 hours for illegal broadcasting. Press 9.",
+      "expected": "High"
+    },
+    {
+      "id": "S-067",
+      "category": "Digital Arrest",
+      "text": "Crime Branch Police: Non-bailable arrest warrant issued. Digital arrest hearing on Skype within 30 minutes. Contact DCP Sharma.",
+      "expected": "High"
+    },
+    {
+      "id": "S-068",
+      "category": "Digital Arrest",
+      "text": "Customs Department: Parcel from Malaysia under your name detained for illegal currency. Immediate penalty payment required.",
+      "expected": "High"
+    },
+    {
+      "id": "S-069",
+      "category": "Digital Arrest",
+      "text": "Enforcement Directorate (ED): Summon notice issued for hawala transaction. Download legal notice APK: http://ed-summons.top/file.apk",
+      "expected": "High"
+    },
+    {
+      "id": "S-070",
+      "category": "Digital Arrest",
+      "text": "Narcotics Control Bureau (NCB): Illegal substance detected in international courier sent by you. Digital arrest interrogation begins.",
+      "expected": "High"
+    },
+    {
+      "id": "S-071",
+      "category": "Digital Arrest",
+      "text": "Supreme Court Cyber Cell: Digital arrest warrant active. Do not disconnect phone or legal action will follow.",
+      "expected": "High"
+    },
+    {
+      "id": "S-072",
+      "category": "Digital Arrest",
+      "text": "FedEx Alert: Parcel seized by customs with fake passports and drugs. Mumbai crime branch case registered against you.",
+      "expected": "High"
+    },
+    {
+      "id": "S-073",
+      "category": "Digital Arrest",
+      "text": "Delhi Police: Cyber fraud complaint registered against your phone number. Report to cyber officer immediately 9811224455.",
+      "expected": "High"
+    },
+    {
+      "id": "S-074",
+      "category": "Digital Arrest",
+      "text": "Interpol Notice: Red corner notice pending against your name for financial fraud. Connect to officer via video call.",
+      "expected": "High"
+    },
+    {
+      "id": "S-075",
+      "category": "Digital Arrest",
+      "text": "TRAI Alert: 14 illegal SIM cards issued on your Aadhaar card. Digital arrest proceeding started by Mumbai Police.",
+      "expected": "High"
+    },
+    {
+      "id": "S-076",
+      "category": "Lottery Scam",
+      "text": "KBC Lucky Draw: Congratulations! Your mobile number won Rs 25,00,000 in KBC Lottery. Call Rana Pratap 9812345678 to claim.",
+      "expected": "High"
+    },
+    {
+      "id": "S-077",
+      "category": "Lottery Scam",
+      "text": "Dear customer, you have won cash prize of Rs 50,000 from Tata Motors 150th year celebration. Claim here: https://tata-prize.xyz",
+      "expected": "High"
+    },
+    {
+      "id": "S-078",
+      "category": "Lottery Scam",
+      "text": "Congratulations! You won lottery of Rs 10 Lakhs. Lottery lag gayi! Call manager on WhatsApp 8899001122 to collect cheque.",
+      "expected": "High"
+    },
+    {
+      "id": "S-079",
+      "category": "Lottery Scam",
+      "text": "Jio 5G Lucky Winner: You are selected for free iPhone 15 Pro + Rs 1 Lakh cash reward. Register at http://jio-winner.top",
+      "expected": "High"
+    },
+    {
+      "id": "S-080",
+      "category": "Lottery Scam",
+      "text": "Naaptol Lucky Draw: Your mobile number won Mahindra Thar or Rs 12 Lakh cash. Call officer 9412345678.",
+      "expected": "High"
+    },
+    {
+      "id": "S-081",
+      "category": "Lottery Scam",
+      "text": "Maruti Suzuki 40th anniversary lucky draw: You won cash reward of Rs 7,50,000. Claim at http://maruti-draw.buzz",
+      "expected": "High"
+    },
+    {
+      "id": "S-082",
+      "category": "Lottery Scam",
+      "text": "Winner alert! You won Rs 1,00,000 cash in Diwali bumper lucky draw. Contact WhatsApp 9988112233.",
+      "expected": "High"
+    },
+    {
+      "id": "S-083",
+      "category": "Lottery Scam",
+      "text": "KBC WhatsApp Lottery: Your number won 25 Lakh INR. Call Mr. Verma on 8123456789 for tax clearance.",
+      "expected": "High"
+    },
+    {
+      "id": "S-084",
+      "category": "Lottery Scam",
+      "text": "Congratulations you won free gift card worth Rs 25,000 from Flipkart! Claim your prize: http://giftcard-claim.click",
+      "expected": "High"
+    },
+    {
+      "id": "S-085",
+      "category": "Lottery Scam",
+      "text": "Aapka number KBC lucky draw me 25 lakh rupaye jeet chuka hai. Cheque lene ke liye officer ko call karein.",
+      "expected": "High"
+    },
+    {
+      "id": "S-086",
+      "category": "Phishing Shortlinks",
+      "text": "Traffic police e-challan pending Rs 1,500. Pay fine immediately to avoid court notice: https://echallan-parivahan.top/pay",
+      "expected": "High"
+    },
+    {
+      "id": "S-087",
+      "category": "Phishing Shortlinks",
+      "text": "Income tax refund of Rs 18,450 approved. Provide bank account details to receive refund: https://incometax-refund.xyz/claim",
+      "expected": "High"
+    },
+    {
+      "id": "S-088",
+      "category": "Phishing Shortlinks",
+      "text": "Speed Post: Your package could not be delivered due to wrong address. Update address now: http://indiapost-parcel.site",
+      "expected": "High"
+    },
+    {
+      "id": "S-089",
+      "category": "Phishing Shortlinks",
+      "text": "Netflix membership expired. Update payment method within 24 hours to keep streaming: https://netflix-renew.club/login",
+      "expected": "High"
+    },
+    {
+      "id": "S-090",
+      "category": "Phishing Shortlinks",
+      "text": "EPFO Alert: PF interest of Rs 42,000 credited. View passbook and claim bonus: https://epfindia-passbook.online",
+      "expected": "High"
+    },
+    {
+      "id": "S-091",
+      "category": "Phishing Shortlinks",
+      "text": "Your Jio SIM will be deactivated today. Do immediate KYC verification on bit.ly/jio-kyc-verify",
+      "expected": "High"
+    },
+    {
+      "id": "S-092",
+      "category": "Phishing Shortlinks",
+      "text": "Airtel user: 50GB free 5G data credited to your number. Activate now: http://airtel-5g.space/activate",
+      "expected": "High"
+    },
+    {
+      "id": "S-093",
+      "category": "Phishing Shortlinks",
+      "text": "PM Kisan Yojana: 16th installment of Rs 2,000 transferred. Check beneficiary status: https://pmkisan-status.work",
+      "expected": "High"
+    },
+    {
+      "id": "S-094",
+      "category": "Phishing Shortlinks",
+      "text": "Gas subsidy of Rs 450 pending. Link bank account to receive subsidy: https://gas-subsidy.click",
+      "expected": "High"
+    },
+    {
+      "id": "S-095",
+      "category": "Phishing Shortlinks",
+      "text": "Urgent: Your credit score dropped by 120 points. Check free dispute report: http://cibil-dispute.top",
+      "expected": "High"
+    },
+    {
+      "id": "S-096",
+      "category": "Loan Extortion",
+      "text": "Instant personal loan Rs 2,00,000 approved without CIBIL. Disbursal in 5 mins. Download app: http://instant-loan.top/loan.apk",
+      "expected": "High"
+    },
+    {
+      "id": "S-097",
+      "category": "Loan Extortion",
+      "text": "Legal Warning: Overdue loan of Rs 12,000 not paid. We will send notice to your family & contacts today. Pay now on 9812345678.",
+      "expected": "High"
+    },
+    {
+      "id": "S-098",
+      "category": "Loan Extortion",
+      "text": "Final warning! Repay loan by 4 PM or your morphed photos will be shared on social media and contact list.",
+      "expected": "High"
+    },
+    {
+      "id": "S-099",
+      "category": "Loan Extortion",
+      "text": "Need quick cash? Get Rs 50,000 instant loan in 2 minutes. Install app: http://quick-cash.space/cash.apk",
+      "expected": "High"
+    },
+    {
+      "id": "S-100",
+      "category": "Loan Extortion",
+      "text": "Loan recovery agent visiting your home & office today for non-payment. Clear dues immediately to prevent visit.",
+      "expected": "High"
+    },
+    {
+      "id": "G-001",
+      "category": "E-commerce Delivery",
+      "text": "Your Amazon package with order #402-8192817 is arriving today by 8 PM. Track your package: https://www.amazon.in/gp/your-account/order-history",
+      "expected": "Low"
+    },
+    {
+      "id": "G-002",
+      "category": "E-commerce Delivery",
+      "text": "Your Flipkart order OD123456789 has been shipped. Track your delivery at https://flipkart.com/track/OD123456789",
+      "expected": "Low"
+    },
+    {
+      "id": "G-003",
+      "category": "E-commerce Delivery",
+      "text": "Your Swiggy order from Biryani Blues is on the way! Track here: https://swiggy.com/track/123456",
+      "expected": "Low"
+    },
+    {
+      "id": "G-004",
+      "category": "E-commerce Delivery",
+      "text": "Zomato: Your order from Pizza Hut has been delivered. Enjoy your meal! View bill: https://zomato.com/orders",
+      "expected": "Low"
+    },
+    {
+      "id": "G-005",
+      "category": "E-commerce Delivery",
+      "text": "Your Amazon package with order #404-1234567 was delivered. Share feedback: https://www.amazon.in/feedback",
+      "expected": "Low"
+    },
+    {
+      "id": "G-006",
+      "category": "E-commerce Delivery",
+      "text": "Delhivery AWB 9876543210 is out for delivery today. Delivery agent will arrive between 2 PM to 5 PM.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-007",
+      "category": "E-commerce Delivery",
+      "text": "BlueDart Tracking: Waybill 12345678 has arrived at Mumbai hub and is scheduled for delivery today.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-008",
+      "category": "E-commerce Delivery",
+      "text": "Myntra: Order #98765432 has been delivered. Exchange/return available till 31 Oct on https://myntra.com",
+      "expected": "Low"
+    },
+    {
+      "id": "G-009",
+      "category": "E-commerce Delivery",
+      "text": "Uber: Your ride with driver Ramesh in Swift Dzire is arriving in 3 mins. PIN is 4921.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-010",
+      "category": "E-commerce Delivery",
+      "text": "Ola Cabs: Your driver is arriving. Ride OTP is 8312. Do not share with driver before boarding.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-011",
+      "category": "E-commerce Delivery",
+      "text": "Tata Neu: Your BigBasket grocery order is packed and will be delivered by 6 PM today.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-012",
+      "category": "E-commerce Delivery",
+      "text": "Blinkit: Order delivered in 11 minutes! Check invoice on your app.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-013",
+      "category": "E-commerce Delivery",
+      "text": "Zepto: Your groceries are out for delivery with our rider. Track live in app.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-014",
+      "category": "E-commerce Delivery",
+      "text": "Your Amazon delivery driver Suresh is arriving with 1 parcel. OTP for delivery is 7291.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-015",
+      "category": "E-commerce Delivery",
+      "text": "Flipkart: Delivery agent Vikas is arriving with your order. Share OTP 3920 at the time of delivery.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-016",
+      "category": "E-commerce Delivery",
+      "text": "India Post Speed Post tracking #ED123456789IN delivered on 24/10/2026 at Bangalore GPO.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-017",
+      "category": "E-commerce Delivery",
+      "text": "Urban Company: Professional Arvind has started your AC service appointment today at 11 AM.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-018",
+      "category": "E-commerce Delivery",
+      "text": "Amazon.in: Your refund of INR 899 for returned item has been initiated to your bank account.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-019",
+      "category": "E-commerce Delivery",
+      "text": "Swiggy Instamart: Order confirmed. Rider is picking up items from the dark store.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-020",
+      "category": "E-commerce Delivery",
+      "text": "Ajio: Your fashion order #AJ12345 is confirmed and will reach you by Tuesday.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-021",
+      "category": "E-commerce Delivery",
+      "text": "Nykaa: Order shipped via BlueDart. Track delivery at https://nykaa.com/orders",
+      "expected": "Low"
+    },
+    {
+      "id": "G-022",
+      "category": "E-commerce Delivery",
+      "text": "Lenskart: Your spectacles are ready and dispatched via courier. Tracking #LK9821.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-023",
+      "category": "E-commerce Delivery",
+      "text": "Dominos: Your pizza is baking in the oven! Track live delivery on our app.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-024",
+      "category": "E-commerce Delivery",
+      "text": "Amazon: Package arriving early! Expected delivery today before 2 PM.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-025",
+      "category": "E-commerce Delivery",
+      "text": "BookMyShow: Tickets confirmed for 7:30 PM show. Booking ID: WXZY819.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-026",
+      "category": "Legitimate OTP",
+      "text": "492810 is your Amazon OTP. Do not share this OTP with anyone. Amazon will never call or SMS to ask for your OTP.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-027",
+      "category": "Legitimate OTP",
+      "text": "782914 is your verification code for Google account recovery. Never share this code.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-028",
+      "category": "Legitimate OTP",
+      "text": "Dear SBI Customer, OTP for login to NetBanking is 918234. Valid for 10 mins. Do not share with anyone.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-029",
+      "category": "Legitimate OTP",
+      "text": "HDFC Bank: 628190 is the OTP to authorize transaction of INR 1,299 at Amazon. Bank never calls to ask OTP.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-030",
+      "category": "Legitimate OTP",
+      "text": "ICICI Bank: OTP for debit card transaction of INR 450 is 392817. Valid for 5 minutes. Do not share.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-031",
+      "category": "Legitimate OTP",
+      "text": "Your WhatsApp verification code is 829-102. You can also tap link to verify: https://v.whatsapp.com",
+      "expected": "Low"
+    },
+    {
+      "id": "G-032",
+      "category": "Legitimate OTP",
+      "text": "Microsoft verification code: 492019. If you did not request this code, please ignore this message.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-033",
+      "category": "Legitimate OTP",
+      "text": "Your Apple ID verification code is 192837. Do not share it with anyone.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-034",
+      "category": "Legitimate OTP",
+      "text": "Axis Bank: 582910 is your OTP for beneficiary addition in mobile banking. Valid for 3 mins.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-035",
+      "category": "Legitimate OTP",
+      "text": "Flipkart login OTP is 392182. Valid for 10 minutes. Do not share with customer care.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-036",
+      "category": "Legitimate OTP",
+      "text": "Kotak Bank: OTP for online transaction is 482910. Never share your OTP, password or card details.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-037",
+      "category": "Legitimate OTP",
+      "text": "Swiggy login code is 8192. Never share this OTP with delivery partners.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-038",
+      "category": "Legitimate OTP",
+      "text": "Aadhaar authentication OTP is 739201 for e-KYC. Valid for 10 minutes from UIDAI.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-039",
+      "category": "Legitimate OTP",
+      "text": "Paytm: 839201 is your OTP to link bank account. Paytm employees will never ask for your OTP.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-040",
+      "category": "Legitimate OTP",
+      "text": "Zomato OTP: 4928 is your verification code to log in to Zomato.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-041",
+      "category": "Legitimate OTP",
+      "text": "CRED login OTP is 9281. Do not share this OTP with anyone.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-042",
+      "category": "Legitimate OTP",
+      "text": "IRCTC booking OTP is 582910. Valid for ticket reservation on official portal.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-043",
+      "category": "Legitimate OTP",
+      "text": "Canara Bank: 391029 is OTP for Fund Transfer of INR 5000. Do not disclose OTP to anyone.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-044",
+      "category": "Legitimate OTP",
+      "text": "Uber login OTP is 4921. Never share this code with anyone.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-045",
+      "category": "Legitimate OTP",
+      "text": "LinkedIn: 739281 is your verification pin. Expires in 15 mins.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-046",
+      "category": "Legitimate OTP",
+      "text": "CoWIN: OTP for registration is 492018. Valid for 3 minutes from Ministry of Health.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-047",
+      "category": "Legitimate OTP",
+      "text": "EPFO login OTP: 819203 for UAN portal access. Do not share.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-048",
+      "category": "Legitimate OTP",
+      "text": "Twitter verification code is 382910. Use this code to complete login.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-049",
+      "category": "Legitimate OTP",
+      "text": "Instagram: 492 819 is your security code. Don't share it.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-050",
+      "category": "Legitimate OTP",
+      "text": "Zerodha: 392810 is your Kite login 2FA OTP. Never share with anyone.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-051",
+      "category": "Bank Transaction",
+      "text": "Dear SBI User, your A/c XX1234 is debited by INR 450.00 on 24-Oct-26 at Swiggy. Avl Bal: INR 12,450.75.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-052",
+      "category": "Bank Transaction",
+      "text": "HDFC Bank: INR 2,500.00 credited to A/c ending 9876 on 24-OCT-26 by UPI. Avl bal INR 45,920.10.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-053",
+      "category": "Bank Transaction",
+      "text": "ICICI Bank: Acct XX492 debited with INR 120.00 on 24-Oct-26 at Metro Station. Avl Bal INR 8,300.00.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-054",
+      "category": "Bank Transaction",
+      "text": "Salary of INR 65,000.00 credited to your A/c XX8192 on 25-Oct-26. Total balance: INR 78,410.00.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-055",
+      "category": "Bank Transaction",
+      "text": "Axis Bank: INR 350.00 debited from A/c 4928 for UPI payment to Zepto. Avl Bal: INR 15,200.50.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-056",
+      "category": "Bank Transaction",
+      "text": "Kotak Bank: Rs 1,800.00 debited from a/c 8192 towards Amazon purchase. Avl Bal Rs 22,400.00.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-057",
+      "category": "Bank Transaction",
+      "text": "PNB: Your account 9821 is credited by Rs 500.00 via IMPS from Sharma. Avl Bal Rs 6,540.00.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-058",
+      "category": "Bank Transaction",
+      "text": "Bank of Baroda: A/c 3812 debited with Rs 75.00 for tea stall UPI. Avl Bal: Rs 4,120.00.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-059",
+      "category": "Bank Transaction",
+      "text": "SBI: INR 10,000 withdrawn at ATM on 23-Oct-26. A/c XX1234. Avl Bal: INR 2,450.75.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-060",
+      "category": "Bank Transaction",
+      "text": "HDFC Credit Card: INR 4,200 spent on card ending 8819 at Reliance Digital. Avl Limit: INR 1,45,000.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-061",
+      "category": "Bank Transaction",
+      "text": "ICICI Credit Card: Payment of INR 12,500 received on 22-Oct-26. Thank you for paying your bill.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-062",
+      "category": "Bank Transaction",
+      "text": "Canara Bank: A/c XX9921 debited for INR 600.00 towards Electricity Bill auto-debit. Avl Bal INR 19,100.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-063",
+      "category": "Bank Transaction",
+      "text": "Union Bank: Rs 3,000.00 credited to account 8219 by UPI/P2P transfer. Avl Bal: Rs 8,900.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-064",
+      "category": "Bank Transaction",
+      "text": "SBI: Monthly interest of INR 85.00 credited to Savings A/c XX1234 on 30-Sep-26. Avl Bal: INR 12,535.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-065",
+      "category": "Bank Transaction",
+      "text": "IndusInd Bank: INR 850 debited at Shell Petrol Pump. Avl Bal INR 31,400.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-066",
+      "category": "Bank Transaction",
+      "text": "IDFC FIRST Bank: Rs 5,000 transferred via NEFT to Account 819281. Ref #N1234567.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-067",
+      "category": "Bank Transaction",
+      "text": "Standard Chartered: USD 15.00 charged for GitHub Subscription on card ending 4412.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-068",
+      "category": "Bank Transaction",
+      "text": "Yes Bank: INR 200 debited from a/c XX3829 for Fastag toll payment at Toll Plaza.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-069",
+      "category": "Bank Transaction",
+      "text": "HDFC Bank: Auto-debit of INR 1,000 for Mutual Fund SIP executed successfully.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-070",
+      "category": "Bank Transaction",
+      "text": "SBI Card: Minimum amount due of INR 1,240 received on card ending 9102.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-071",
+      "category": "Bank Transaction",
+      "text": "Federal Bank: INR 3,500 credited via Google Pay UPI. Avl Bal: INR 18,250.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-072",
+      "category": "Bank Transaction",
+      "text": "Paytm Payments Bank: Rs 40 paid at Mother Dairy. Avl Wallet Bal: Rs 620.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-073",
+      "category": "Bank Transaction",
+      "text": "Airtel Payments Bank: Rs 299 debited for mobile recharge. Balance: Rs 1,400.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-074",
+      "category": "Bank Transaction",
+      "text": "Citibank: Your payment of INR 8,400 has cleared. Available credit limit restored.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-075",
+      "category": "Bank Transaction",
+      "text": "SBI: INR 250 debited for annual debit card maintenance charge. Avl Bal: INR 12,285.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-076",
+      "category": "Carrier Alerts",
+      "text": "Airtel: 100% of daily data quota 1.5GB exhausted. Data speed reduced. Buy 1GB data booster on Airtel Thanks app.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-077",
+      "category": "Carrier Alerts",
+      "text": "Jio: Your plan of Rs 299 expires in 3 days. Recharge on MyJio app or official website https://jio.com",
+      "expected": "Low"
+    },
+    {
+      "id": "G-078",
+      "category": "Carrier Alerts",
+      "text": "Vi: Thank you for recharging with Rs 479 plan. Unlimited calls and 1.5GB/day data active for 56 days.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-079",
+      "category": "Carrier Alerts",
+      "text": "BSNL: Your mobile validity extended till 30-Nov-2026. Dial *123# to check main balance.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-080",
+      "category": "Carrier Alerts",
+      "text": "Airtel Wi-Fi: Bill of INR 943 generated for connection #0801234567. Due date 05-Nov. Pay on Airtel Thanks app.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-081",
+      "category": "Carrier Alerts",
+      "text": "JioFiber: Scheduled maintenance in your area on 26-Oct from 2 AM to 4 AM. Services will resume automatically.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-082",
+      "category": "Carrier Alerts",
+      "text": "Airtel: International roaming pack activated for USA. Valid for 30 days. Enjoy 5GB data and 100 mins calling.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-083",
+      "category": "Carrier Alerts",
+      "text": "Vi: Your postpaid bill payment of Rs 599 is successful. Transaction ID: VI8192819.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-084",
+      "category": "Carrier Alerts",
+      "text": "Tata Play: Balance low. Your DTH connection will deactivate on 28-Oct. Recharge online to continue viewing.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-085",
+      "category": "Carrier Alerts",
+      "text": "DishTV: Special offer! Recharge for 12 months and get 1 month free. Visit dishtv.in",
+      "expected": "Low"
+    },
+    {
+      "id": "G-086",
+      "category": "Carrier Alerts",
+      "text": "Jio: You have used 50% of your daily data. High speed data remaining: 750 MB.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-087",
+      "category": "Carrier Alerts",
+      "text": "Airtel: Free Hello Tunes activated on your number. Manage tunes on Wynk Music app.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-088",
+      "category": "Carrier Alerts",
+      "text": "Vi Hero Unlimited: Enjoy free night data from 12 AM to 6 AM without data pack deduction.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-089",
+      "category": "Carrier Alerts",
+      "text": "Airtel: Missed call alert from 9812345678 at 14:32 PM while your phone was busy.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-090",
+      "category": "Carrier Alerts",
+      "text": "Jio: Emergency data loan of 1GB credited. Pay back on next recharge via MyJio.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-091",
+      "category": "Government Public",
+      "text": "Income Tax Dept: Your ITR for AY 2026-27 has been processed. Check refund status on official portal https://incometax.gov.in",
+      "expected": "Low"
+    },
+    {
+      "id": "G-092",
+      "category": "Government Public",
+      "text": "UIDAI: Mobile number successfully updated in Aadhaar ending with 1234. Official portal https://uidai.gov.in",
+      "expected": "Low"
+    },
+    {
+      "id": "G-093",
+      "category": "Government Public",
+      "text": "IRCTC: PNR 4829102918 train #12951 Mumbai Rajdhani Coach B3 Berth 42 confirmed. Happy Journey!",
+      "expected": "Low"
+    },
+    {
+      "id": "G-094",
+      "category": "Government Public",
+      "text": "EPFO: Contribution of INR 3,600 credited to PF A/c for member ID 1009281. Total PF balance INR 2,45,000.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-095",
+      "category": "Government Public",
+      "text": "Passport Seva: Appointment confirmed at PSK Bangalore on 28-Oct-26 at 10:15 AM. Bring original documents.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-096",
+      "category": "Government Public",
+      "text": "Parivahan Sewa: Vehicle registration renewal application approved for KA-01-AB-1234. Download RC on mParivahan.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-097",
+      "category": "Government Public",
+      "text": "Election Commission: National Voters Day celebration on 25th Jan. Verify name in voter list on electors.eci.gov.in",
+      "expected": "Low"
+    },
+    {
+      "id": "G-098",
+      "category": "Government Public",
+      "text": "National Disaster Management (NDMA): Moderate rainfall warning for Coastal Karnataka over next 24 hours.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-099",
+      "category": "Government Public",
+      "text": "Indane Gas: Cylinder booking ref #IND98218 confirmed. Cash on delivery amount Rs 803. Delivery within 2 days.",
+      "expected": "Low"
+    },
+    {
+      "id": "G-100",
+      "category": "Government Public",
+      "text": "National Career Service: Job Fair organized in Bangalore on 29 Oct. Free registration on ncs.gov.in",
+      "expected": "Low"
+    }
+  ]
+}

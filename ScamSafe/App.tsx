@@ -6,8 +6,10 @@ import {
   Animated,
   AppState,
   type AppStateStatus,
+  BackHandler,
   FlatList,
   Linking,
+  Modal,
   PermissionsAndroid,
   Platform,
   Pressable,
@@ -20,6 +22,8 @@ import {
   View
 } from 'react-native';
 import { analyzeMessage } from './src/api';
+import { CLOUD_ENABLED, PRIVACY_URL } from './src/config';
+import { AUTO_KEY, deleteAllUserData, ensureInstallId, grantConsent, hasConsent } from './src/consent';
 import { addEntry, clearAll, getAll, isDontClick, pinToggle, remove, type Entry } from './src/storage';
 import { isSmsScannerAvailable, readRecentSms, subscribeToIncomingSms, type SmsMessage } from './src/smsReader';
 
@@ -31,13 +35,13 @@ type SmsResult = {
   explanation: string;
   scam_signals: string[];
   recommended_action: string;
-  confidence: number;
+  confidence: number | null;
+  engine?: 'cloud_ai' | 'on_device_rules';
   if_already_sent?: string;
 };
 
 const SCAN_LIMIT = 10;
-const DANGER_SCORE = 80;
-const AUTO_KEY = 'scamsafe_auto_v1';
+const DANGER_SCORE = 75;
 const STORAGE_KEY = 'scamsafe_v1';
 
 // ============================================================
@@ -112,8 +116,9 @@ const FONT_MEDIUM = Platform.select({ android: 'sans-serif-medium', ios: 'System
 
 const TypedFlatList = FlatList as unknown as React.ComponentType<any>;
 
-function App(): React.JSX.Element {
+function App({ onDataDeleted }: { onDataDeleted: () => void }): React.JSX.Element {
   const [tab, setTab] = useState<TabKey>('scan');
+  const [settingsOpen, setSettingsOpen] = useState<boolean>(false);
   const [entries, setEntries] = useState<Entry[]>([]);
   const [autoEnabled, setAutoEnabled] = useState<boolean>(true);
   const [manualText, setManualText] = useState<string>('');
@@ -508,6 +513,38 @@ function App(): React.JSX.Element {
     ]);
   }, []);
 
+  const onOpenPrivacyPolicy = useCallback((): void => {
+    Linking.openURL(PRIVACY_URL).catch(() => {
+      Alert.alert('Could not open link', PRIVACY_URL);
+    });
+  }, []);
+
+  const onDeleteAllData = useCallback((): void => {
+    Alert.alert(
+      'Delete all my data',
+      'This removes every saved scan, your settings and your consent from this phone. You will see "Before you start" again. To also remove the SMS permission, use Android Settings > Apps > ScamSafe > Permissions.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete everything',
+          style: 'destructive',
+          onPress: () => {
+            void (async () => {
+              try {
+                await deleteAllUserData();
+              } catch {
+              }
+              setEntries([]);
+              setManualResult(null);
+              setSettingsOpen(false);
+              onDataDeleted();
+            })();
+          }
+        }
+      ]
+    );
+  }, [onDataDeleted]);
+
   const progressPercent = useMemo(() => {
     if (scanTotal <= 0) {
       return 0;
@@ -558,20 +595,71 @@ function App(): React.JSX.Element {
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor={COLORS.bg} translucent />
 
+      {/* SETTINGS (privacy policy + delete all my data) */}
+      <Modal visible={settingsOpen} transparent animationType="fade" onRequestClose={() => setSettingsOpen(false)}>
+        <Pressable style={styles.settingsBackdrop} onPress={() => setSettingsOpen(false)} accessible={false}>
+          <View style={styles.settingsSheet} onStartShouldSetResponder={() => true}>
+            <Text style={styles.settingsTitle} accessibilityRole="header">Settings</Text>
+            <Pressable
+              accessible={true}
+              accessibilityRole="button"
+              accessibilityLabel="Privacy policy"
+              accessibilityHint="Opens the privacy policy in your browser"
+              style={({ pressed }) => [styles.settingsRow, pressed && styles.scalePressed]}
+              onPress={onOpenPrivacyPolicy}
+            >
+              <Text style={styles.settingsRowText}>Privacy policy</Text>
+              <Text style={styles.chevronText}>›</Text>
+            </Pressable>
+            <Pressable
+              accessible={true}
+              accessibilityRole="button"
+              accessibilityLabel="Delete all my data"
+              accessibilityHint="Removes all saved scans, settings and consent from this phone"
+              style={({ pressed }) => [styles.settingsRow, styles.settingsRowDanger, pressed && styles.scalePressed]}
+              onPress={onDeleteAllData}
+            >
+              <Text style={[styles.settingsRowText, { color: COLORS.fraud }]}>Delete all my data</Text>
+            </Pressable>
+            <Pressable
+              accessible={true}
+              accessibilityRole="button"
+              accessibilityLabel="Close settings"
+              style={({ pressed }) => [styles.settingsClose, pressed && styles.scalePressed]}
+              onPress={() => setSettingsOpen(false)}
+            >
+              <Text style={styles.checkButtonText}>Close</Text>
+            </Pressable>
+          </View>
+        </Pressable>
+      </Modal>
+
       {/* 1) UNIFORM MODERN HEADER */}
       <Animated.View style={[styles.header, { opacity: fade }]}>
         <View style={styles.headerTopBar}>
-          <View style={styles.headerPillButton}>
+          <Pressable
+            style={({ pressed }) => [styles.headerPillButton, pressed && styles.scalePressed]}
+            accessible={true}
+            accessibilityRole="button"
+            accessibilityLabel="Application settings and menu"
+            accessibilityHint="Opens settings: privacy policy and delete all my data"
+            onPress={() => setSettingsOpen(true)}
+          >
             <View style={styles.menuIconBar} />
             <View style={[styles.menuIconBar, { width: 12 }]} />
-          </View>
-          <View style={styles.brandContainer}>
+          </Pressable>
+          <View style={styles.brandContainer} accessible={true} accessibilityRole="header" accessibilityLabel="ScamSafe Application">
             <Text style={styles.brandLight}>Scam<Text style={styles.brandBold}>Safe</Text></Text>
             <View style={styles.betaBadge}>
               <Text style={styles.betaText}>BETA</Text>
             </View>
           </View>
-          <View style={styles.headerPillButton}>
+          <View
+            style={styles.headerPillButton}
+            accessible={true}
+            accessibilityRole="image"
+            accessibilityLabel="Security status: active protection"
+          >
             <View style={styles.shieldIconShape} />
           </View>
         </View>
@@ -611,7 +699,7 @@ function App(): React.JSX.Element {
                   <View style={styles.statsDivider} />
                   <StatColumn icon="~" label="Suspicious" value={counts.suspicious} color={COLORS.suspicious} />
                   <View style={styles.statsDivider} />
-                  <StatColumn icon="✓" label="Safe" value={counts.safe} color={COLORS.safe} />
+                  <StatColumn icon="–" label="Low risk" value={counts.safe} color={COLORS.safe} />
                 </View>
               </View>
             </View>
@@ -620,6 +708,10 @@ function App(): React.JSX.Element {
           {/* QUICK-ACTION TILES (like Agregar Gasto / Agregar Ingreso / Ver Transacción) */}
           <View style={styles.quickActionsRow}>
             <Pressable
+              accessible={true}
+              accessibilityRole="button"
+              accessibilityLabel="Manual text check"
+              accessibilityHint="Scroll down to the manual text check card to paste an SMS"
               style={({ pressed }) => [styles.quickTile, pressed && styles.scalePressed]}
               onPress={() => {
                 // Focus / quick feedback
@@ -633,6 +725,10 @@ function App(): React.JSX.Element {
             </Pressable>
 
             <Pressable
+              accessible={true}
+              accessibilityRole="button"
+              accessibilityLabel={`Auto-Scan is ${autoEnabled ? 'Enabled' : 'Paused'}`}
+              accessibilityHint="Toggles automated background scanning of incoming SMS"
               style={({ pressed }) => [styles.quickTile, pressed && styles.scalePressed]}
               onPress={() => {
                 void onToggleAuto(!autoEnabled);
@@ -646,6 +742,10 @@ function App(): React.JSX.Element {
             </Pressable>
 
             <Pressable
+              accessible={true}
+              accessibilityRole="button"
+              accessibilityLabel={`View scan history, ${entries.length} items`}
+              accessibilityHint="Navigates to the History tab"
               style={({ pressed }) => [styles.quickTile, pressed && styles.scalePressed]}
               onPress={() => setTab('history')}
             >
@@ -659,6 +759,10 @@ function App(): React.JSX.Element {
 
           {/* PRIMARY GRADIENT CTA CARD ("Agregar Nueva meta" style) */}
           <Pressable
+            accessible={true}
+            accessibilityRole="button"
+            accessibilityLabel={scanLoading ? "Analyzing SMS messages in progress" : "Scan My Messages"}
+            accessibilityHint={`Scans up to ${SCAN_LIMIT} recent SMS from the last 7 days`}
             style={({ pressed }) => [styles.primaryCtaCard, pressed && styles.scalePressed, scanLoading && styles.dimmed]}
             onPress={() => { void onManualScan(); }}
           >
@@ -701,7 +805,7 @@ function App(): React.JSX.Element {
                 <View style={styles.scanStatDivider} />
                 <View style={styles.scanStatItem}>
                   <Text style={[styles.scanStatNumber, { color: COLORS.safe }]}>{Math.max(0, scanDone - scanDetected)}</Text>
-                  <Text style={styles.scanStatLabel}>Safe</Text>
+                  <Text style={styles.scanStatLabel}>Low risk</Text>
                 </View>
               </View>
             </View>
@@ -716,7 +820,7 @@ function App(): React.JSX.Element {
                 </View>
                 <View style={styles.flexOne}>
                   <Text style={styles.summaryTitle}>Scan Complete</Text>
-                  <Text style={styles.summarySub}>{lastScanSummary.total} messages verified with AI</Text>
+                  <Text style={styles.summarySub}>{lastScanSummary.total} messages checked</Text>
                 </View>
               </View>
 
@@ -731,11 +835,18 @@ function App(): React.JSX.Element {
                 </View>
                 <View style={[styles.summaryCard, { backgroundColor: COLORS.safeBg, borderColor: COLORS.safeBorder }]}>
                   <Text style={[styles.summaryCardNumber, { color: COLORS.safe }]}>{lastScanSummary.safe}</Text>
-                  <Text style={styles.summaryCardLabel}>Safe</Text>
+                  <Text style={styles.summaryCardLabel}>Low risk</Text>
                 </View>
               </View>
 
-              <Pressable style={({ pressed }) => [styles.viewHistoryBtn, pressed && styles.scalePressed]} onPress={() => setTab('history')}>
+              <Pressable
+                accessible={true}
+                accessibilityRole="button"
+                accessibilityLabel="View Full History"
+                accessibilityHint="Navigates to the History tab to review all scanned messages"
+                style={({ pressed }) => [styles.viewHistoryBtn, pressed && styles.scalePressed]}
+                onPress={() => setTab('history')}
+              >
                 <Text style={styles.viewHistoryText}>View Full History →</Text>
               </Pressable>
             </View>
@@ -775,7 +886,7 @@ function App(): React.JSX.Element {
                 <View style={styles.chartBarTrack}>
                   <View style={[styles.chartBarFill, { height: `${Math.max(12, safePercent)}%`, backgroundColor: COLORS.safe }]} />
                 </View>
-                <Text style={styles.chartBarName}>Safe</Text>
+                <Text style={styles.chartBarName}>Low risk</Text>
               </View>
             </View>
           </View>
@@ -788,6 +899,11 @@ function App(): React.JSX.Element {
                 <Text style={styles.panelSub}>{autoNote}</Text>
               </View>
               <Switch
+                accessible={true}
+                accessibilityRole="switch"
+                accessibilityLabel="Background Auto-Scan"
+                accessibilityHint="Toggles automatic background analysis for incoming SMS messages"
+                accessibilityState={{ checked: autoEnabled }}
                 value={autoEnabled}
                 onValueChange={(value) => {
                   void onToggleAuto(value);
@@ -803,6 +919,9 @@ function App(): React.JSX.Element {
             <Text style={styles.panelTitle}>Manual Text Check</Text>
             <Text style={styles.panelSub}>Paste a suspicious SMS, UPI alert, bank text, or phishing link</Text>
             <TextInput
+              accessible={true}
+              accessibilityLabel="Suspicious SMS message input field"
+              accessibilityHint="Type or paste SMS content here to analyze"
               value={manualText}
               onChangeText={setManualText}
               multiline
@@ -814,6 +933,10 @@ function App(): React.JSX.Element {
             <View style={styles.manualActionRow}>
               <Text style={styles.helperText}>Min. 10 characters</Text>
               <Pressable
+                accessible={true}
+                accessibilityRole="button"
+                accessibilityLabel={manualLoading ? "Analyzing pasted text..." : "Analyze Text"}
+                accessibilityHint="Starts scam analysis on the pasted message content"
                 style={({ pressed }) => [
                   styles.checkButton,
                   pressed && styles.scalePressed,
@@ -869,7 +992,14 @@ function App(): React.JSX.Element {
                     <View style={[styles.chipDot, { backgroundColor: COLORS.safe }]} />
                     <Text style={[styles.chipText, { color: COLORS.safe }]}>{counts.safe}</Text>
                   </View>
-                  <Pressable style={({ pressed }) => [styles.clearPillButton, pressed && styles.scalePressed]} onPress={onClearHistory}>
+                  <Pressable
+                    accessible={true}
+                    accessibilityRole="button"
+                    accessibilityLabel="Clear all scan history"
+                    accessibilityHint="Deletes all stored message scans permanently"
+                    style={({ pressed }) => [styles.clearPillButton, pressed && styles.scalePressed]}
+                    onPress={onClearHistory}
+                  >
                     <Text style={styles.clearPillText}>Clear</Text>
                   </Pressable>
                 </View>
@@ -918,8 +1048,13 @@ function App(): React.JSX.Element {
 
       {/* 5) FLOATING BOTTOM NAVIGATION BAR (Capsule pill style from Workouts reference) */}
       <View style={styles.bottomNavContainer}>
-        <View style={styles.floatingNavBar}>
+        <View style={styles.floatingNavBar} accessible={false}>
           <Pressable
+            accessible={true}
+            accessibilityRole="tab"
+            accessibilityLabel="Scan Tab"
+            accessibilityState={{ selected: tab === 'scan' }}
+            accessibilityHint="Navigates to the scanner dashboard"
             style={[styles.floatingTabItem, tab === 'scan' && styles.floatingTabItemActive]}
             onPress={() => setTab('scan')}
           >
@@ -930,6 +1065,11 @@ function App(): React.JSX.Element {
           </Pressable>
 
           <Pressable
+            accessible={true}
+            accessibilityRole="tab"
+            accessibilityLabel="History Tab"
+            accessibilityState={{ selected: tab === 'history' }}
+            accessibilityHint={`Navigates to scan history containing ${entries.length} items`}
             style={[styles.floatingTabItem, tab === 'history' && styles.floatingTabItemActive]}
             onPress={() => setTab('history')}
           >
@@ -941,6 +1081,11 @@ function App(): React.JSX.Element {
           </Pressable>
 
           <Pressable
+            accessible={true}
+            accessibilityRole="tab"
+            accessibilityLabel="Pinned Threats Tab"
+            accessibilityState={{ selected: tab === 'pinned' }}
+            accessibilityHint={`Navigates to pinned threats containing ${pinnedEntries.length} items`}
             style={[styles.floatingTabItem, tab === 'pinned' && styles.floatingTabItemActive]}
             onPress={() => setTab('pinned')}
           >
@@ -1024,13 +1169,20 @@ function RiskCard({
   const scorePercent = Math.min(100, Math.max(0, entry.risk_score));
 
   return (
-    <Pressable onPress={onToggle} style={({ pressed }) => [styles.card, pressed && styles.scalePressed]}>
+    <Pressable
+      accessible={true}
+      accessibilityRole="button"
+      accessibilityLabel={`Message from ${entry.sender}, risk level ${entry.risk_level}, risk score ${entry.risk_score} out of 100. Category: ${entry.scam_type}.`}
+      accessibilityHint={expanded ? "Double tap to collapse details" : "Double tap to expand full analysis"}
+      onPress={onToggle}
+      style={({ pressed }) => [styles.card, pressed && styles.scalePressed]}
+    >
       {/* Top row matching workout item in reference */}
       <View style={styles.cardHeaderRow}>
         {/* Left circular risk badge */}
         <View style={[styles.cardAvatarBadge, { backgroundColor: theme.tint }]}>
           <Text style={[styles.cardAvatarGlyph, { color: theme.txt }]}>
-            {entry.risk_level === 'High' ? '!' : entry.risk_level === 'Medium' ? '▲' : '✓'}
+            {entry.risk_level === 'High' ? '!' : entry.risk_level === 'Medium' ? '▲' : '–'}
           </Text>
           {entry.pinned ? (
             <View style={styles.pinnedStarBadge}>
@@ -1095,7 +1247,7 @@ function RiskCard({
 
           {/* AI Verdict & Risk Bar */}
           <View style={styles.cardResultSection}>
-            <Text style={styles.cardResultLabel}>AI VERDICT</Text>
+            <Text style={styles.cardResultLabel}>SECURITY VERDICT</Text>
             <View style={styles.verdictScoreBarTrack}>
               <View style={[styles.verdictScoreBarFill, { width: `${scorePercent}%`, backgroundColor: theme.txt }]} />
             </View>
@@ -1132,21 +1284,250 @@ function RiskCard({
               </>
             ) : null}
 
-            <Text style={styles.confidenceText}>Confidence: {Math.round(entry.confidence * 100)}%</Text>
+            {typeof entry.confidence === 'number' && entry.confidence > 0 ? (
+              <Text style={styles.confidenceText}>Confidence: {Math.round(entry.confidence * 100)}%</Text>
+            ) : null}
           </View>
 
           {/* Action buttons (Pin + Delete in soft pill style) */}
           <View style={styles.actionRow}>
-            <Pressable style={({ pressed }) => [styles.actionButton, pressed && styles.scalePressed]} onPress={onPin}>
+            <Pressable
+              accessible={true}
+              accessibilityRole="button"
+              accessibilityLabel={entry.pinned ? "Unpin message" : "Pin message to threats"}
+              accessibilityHint="Toggles pinned threat status"
+              style={({ pressed }) => [styles.actionButton, pressed && styles.scalePressed]}
+              onPress={onPin}
+            >
               <Text style={styles.actionButtonText}>{entry.pinned ? '★ Unpin' : '☆ Pin'}</Text>
             </Pressable>
-            <Pressable style={({ pressed }) => [styles.actionButtonDelete, pressed && styles.scalePressed]} onPress={onDelete}>
+            <Pressable
+              accessible={true}
+              accessibilityRole="button"
+              accessibilityLabel="Delete this scan result"
+              accessibilityHint="Permanently removes this entry from your scan history"
+              style={({ pressed }) => [styles.actionButtonDelete, pressed && styles.scalePressed]}
+              onPress={onDelete}
+            >
               <Text style={styles.actionButtonDeleteText}>Delete</Text>
             </Pressable>
           </View>
         </View>
       ) : null}
+
+      {/* Honest labels: exactly ONE of the two engine labels, plus the limits line, on every result */}
+      <View style={styles.cardFooter}>
+        <Text style={styles.cardFooterEngine}>
+          {entry.engine === 'cloud_ai' ? 'Checked with cloud AI (personal numbers hidden)' : 'Checked on your phone only'}
+        </Text>
+        <Text style={styles.cardFooterDisclaimer}>This tool can miss scams. If money or an OTP is involved, call your bank.</Text>
+      </View>
     </Pressable>
+  );
+}
+
+// ============================================================
+// 🔐 FIRST-LAUNCH CONSENT ("Before you start") + ROOT GATE
+// Nothing in <App/> (auto-scan, SMS listener, SMS permission prompt) runs until the user taps "I agree".
+// ============================================================
+function ConsentBlock({ title, children }: { title: string; children: React.ReactNode }): React.JSX.Element {
+  return (
+    <View style={styles.consentBlock}>
+      <Text style={styles.consentBlockTitle}>{title}</Text>
+      <Text style={styles.consentBlockText}>{children}</Text>
+    </View>
+  );
+}
+
+function ConsentScreen({
+  declined,
+  onAgree,
+  onDecline,
+  onReview
+}: {
+  declined: boolean;
+  onAgree: () => void;
+  onDecline: () => void;
+  onReview: () => void;
+}): React.JSX.Element {
+  if (declined) {
+    return (
+      <View style={styles.consentContainer}>
+        <StatusBar barStyle="light-content" backgroundColor={COLORS.bg} translucent />
+        <View style={styles.consentDeclinedBody}>
+          <Text style={styles.consentTitle} accessibilityRole="header">No problem</Text>
+          <Text style={styles.consentIntro}>
+            ScamSafe cannot check your messages without your OK. Nothing was read and nothing was sent.
+          </Text>
+        </View>
+        <View style={styles.consentButtons}>
+          <Pressable
+            accessible={true}
+            accessibilityRole="button"
+            accessibilityLabel="Go back to Before you start"
+            style={({ pressed }) => [styles.consentPrimary, pressed && styles.scalePressed]}
+            onPress={onReview}
+          >
+            <Text style={styles.consentPrimaryText}>Go back</Text>
+          </Pressable>
+          {Platform.OS === 'android' ? (
+            <Pressable
+              accessible={true}
+              accessibilityRole="button"
+              accessibilityLabel="Close the app"
+              style={({ pressed }) => [styles.consentSecondary, pressed && styles.scalePressed]}
+              onPress={() => BackHandler.exitApp()}
+            >
+              <Text style={styles.consentSecondaryText}>Close app</Text>
+            </Pressable>
+          ) : null}
+        </View>
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.consentContainer}>
+      <StatusBar barStyle="light-content" backgroundColor={COLORS.bg} translucent />
+      <ScrollView contentContainerStyle={styles.consentScroll} showsVerticalScrollIndicator={false}>
+        <Text style={styles.consentTitle} accessibilityRole="header">Before you start</Text>
+        <Text style={styles.consentIntro}>
+          ScamSafe checks your text messages for scams. Here is, in plain words, what it does with them.
+        </Text>
+
+        <ConsentBlock title="What it reads">
+          Your SMS messages. After you tap "I agree", Android will ask for permission to read and receive SMS. ScamSafe looks at your 10 most recent messages from the last 7 days when you scan, and at new messages as they arrive while Auto-Scan is on.
+        </ConsentBlock>
+
+        <ConsentBlock title="Where the checking happens">
+          On your phone. The scam rules run on your device, and your scan results are saved on this phone only.
+        </ConsentBlock>
+
+        {CLOUD_ENABLED ? (
+          <ConsentBlock title="Cloud check">
+            To double-check, the text of the messages you scan is sent to our cloud AI service. Before it leaves your phone, card numbers, OTPs, Aadhaar numbers, phone numbers and bank account numbers are replaced with placeholders. Other text, such as names, amounts and links, is not hidden. If the cloud service cannot be reached, your phone does the check alone. Every result tells you which way it was checked.
+          </ConsentBlock>
+        ) : (
+          <ConsentBlock title="Cloud check">
+            This version of ScamSafe does not send any message text to the cloud. Every check happens on your phone only.
+          </ConsentBlock>
+        )}
+
+        <ConsentBlock title="Nothing is sold or shared">
+          We do not sell your data and we do not share it with advertisers or other companies.{CLOUD_ENABLED ? ' The masked text is processed by our AI provider only to produce your result.' : ''}
+        </ConsentBlock>
+
+        <ConsentBlock title="Delete everything, any time">
+          Open the menu at the top left and tap "Delete all my data". To also remove the SMS permission, go to Android Settings, then Apps, then ScamSafe, then Permissions.
+        </ConsentBlock>
+
+        <Text style={styles.consentFootnote}>
+          ScamSafe can miss scams. If money or an OTP is involved, call your bank.
+        </Text>
+
+        <Pressable
+          accessible={true}
+          accessibilityRole="link"
+          accessibilityLabel="Read the full privacy policy"
+          onPress={() => {
+            Linking.openURL(PRIVACY_URL).catch(() => {
+              Alert.alert('Could not open link', PRIVACY_URL);
+            });
+          }}
+        >
+          <Text style={styles.consentLink}>Read the full privacy policy</Text>
+        </Pressable>
+      </ScrollView>
+
+      <View style={styles.consentButtons}>
+        <Pressable
+          accessible={true}
+          accessibilityRole="button"
+          accessibilityLabel="I agree"
+          accessibilityHint="Saves your choice and asks Android for SMS permission"
+          style={({ pressed }) => [styles.consentPrimary, pressed && styles.scalePressed]}
+          onPress={onAgree}
+        >
+          <Text style={styles.consentPrimaryText}>I agree</Text>
+        </Pressable>
+        <Pressable
+          accessible={true}
+          accessibilityRole="button"
+          accessibilityLabel="No thanks"
+          accessibilityHint="Nothing will be read or sent"
+          style={({ pressed }) => [styles.consentSecondary, pressed && styles.scalePressed]}
+          onPress={onDecline}
+        >
+          <Text style={styles.consentSecondaryText}>No thanks</Text>
+        </Pressable>
+      </View>
+    </View>
+  );
+}
+
+type ConsentState = 'loading' | 'needed' | 'declined' | 'granted';
+
+function Root(): React.JSX.Element {
+  const [state, setState] = useState<ConsentState>('loading');
+
+  useEffect(() => {
+    let alive = true;
+    void (async () => {
+      const agreed = await hasConsent();
+      if (agreed) {
+        await ensureInstallId();
+      }
+      if (alive) {
+        setState(agreed ? 'granted' : 'needed');
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const onAgree = useCallback(async (): Promise<void> => {
+    try {
+      await grantConsent();
+    } catch {
+      Alert.alert('Could not save your choice', 'Please try again.');
+      return;
+    }
+    await ensureInstallId();
+    // The SMS permission is requested ONLY now, after "I agree".
+    if (Platform.OS === 'android') {
+      try {
+        await PermissionsAndroid.requestMultiple([
+          PermissionsAndroid.PERMISSIONS.READ_SMS,
+          PermissionsAndroid.PERMISSIONS.RECEIVE_SMS
+        ]);
+      } catch {
+      }
+    }
+    setState('granted');
+  }, []);
+
+  if (state === 'loading') {
+    return (
+      <View style={styles.consentContainer}>
+        <StatusBar barStyle="light-content" backgroundColor={COLORS.bg} translucent />
+      </View>
+    );
+  }
+
+  if (state === 'granted') {
+    return <App onDataDeleted={() => setState('needed')} />;
+  }
+
+  return (
+    <ConsentScreen
+      declined={state === 'declined'}
+      onAgree={() => {
+        void onAgree();
+      }}
+      onDecline={() => setState('declined')}
+      onReview={() => setState('needed')}
+    />
   );
 }
 
@@ -2261,6 +2642,176 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.safe
   },
 
+  // CONSENT SCREEN ("Before you start")
+  consentContainer: {
+    flex: 1,
+    backgroundColor: COLORS.bg,
+    paddingTop: Platform.OS === 'android' ? 44 : 56
+  },
+  consentScroll: {
+    paddingHorizontal: 22,
+    paddingTop: 12,
+    paddingBottom: 24
+  },
+  consentDeclinedBody: {
+    flex: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 22
+  },
+  consentTitle: {
+    color: COLORS.text,
+    fontFamily: FONT_MEDIUM,
+    fontSize: 28,
+    fontWeight: '700'
+  },
+  consentIntro: {
+    marginTop: 10,
+    color: COLORS.t2,
+    fontFamily: FONT,
+    fontSize: 14,
+    lineHeight: 21
+  },
+  consentBlock: {
+    marginTop: 14,
+    backgroundColor: COLORS.surface,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: COLORS.surfaceBorder,
+    padding: 14
+  },
+  consentBlockTitle: {
+    color: COLORS.text,
+    fontFamily: FONT_MEDIUM,
+    fontSize: 14,
+    fontWeight: '700'
+  },
+  consentBlockText: {
+    marginTop: 6,
+    color: COLORS.t2,
+    fontFamily: FONT,
+    fontSize: 13,
+    lineHeight: 20
+  },
+  consentFootnote: {
+    marginTop: 16,
+    color: COLORS.t3,
+    fontFamily: FONT,
+    fontSize: 12,
+    lineHeight: 18
+  },
+  consentLink: {
+    marginTop: 12,
+    color: COLORS.heroLavender,
+    fontFamily: FONT_MEDIUM,
+    fontSize: 13,
+    textDecorationLine: 'underline'
+  },
+  consentButtons: {
+    paddingHorizontal: 22,
+    paddingTop: 10,
+    paddingBottom: 24,
+    gap: 10
+  },
+  consentPrimary: {
+    backgroundColor: COLORS.heroLavender,
+    borderRadius: 999,
+    paddingVertical: 14,
+    alignItems: 'center'
+  },
+  consentPrimaryText: {
+    color: COLORS.bg,
+    fontFamily: FONT_MEDIUM,
+    fontSize: 15,
+    fontWeight: '700'
+  },
+  consentSecondary: {
+    backgroundColor: COLORS.surfaceRaised,
+    borderWidth: 1,
+    borderColor: COLORS.borderLight,
+    borderRadius: 999,
+    paddingVertical: 14,
+    alignItems: 'center'
+  },
+  consentSecondaryText: {
+    color: COLORS.text,
+    fontFamily: FONT_MEDIUM,
+    fontSize: 15,
+    fontWeight: '700'
+  },
+
+  // SETTINGS SHEET
+  settingsBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    justifyContent: 'center',
+    paddingHorizontal: 24
+  },
+  settingsSheet: {
+    backgroundColor: COLORS.surface,
+    borderRadius: 22,
+    borderWidth: 1,
+    borderColor: COLORS.surfaceBorder,
+    padding: 18,
+    gap: 10
+  },
+  settingsTitle: {
+    color: COLORS.text,
+    fontFamily: FONT_MEDIUM,
+    fontSize: 18,
+    fontWeight: '700',
+    marginBottom: 4
+  },
+  settingsRow: {
+    backgroundColor: COLORS.surfaceSubtle,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: COLORS.surfaceBorder,
+    paddingVertical: 14,
+    paddingHorizontal: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between'
+  },
+  settingsRowDanger: {
+    backgroundColor: COLORS.fraudBg,
+    borderColor: COLORS.fraudBorder
+  },
+  settingsRowText: {
+    color: COLORS.text,
+    fontFamily: FONT_MEDIUM,
+    fontSize: 14,
+    fontWeight: '700'
+  },
+  settingsClose: {
+    marginTop: 4,
+    backgroundColor: COLORS.surfaceRaised,
+    borderWidth: 1,
+    borderColor: COLORS.borderLight,
+    borderRadius: 999,
+    paddingVertical: 12,
+    alignItems: 'center'
+  },
+
+  // RESULT CARD FOOTER (honest labels)
+  cardFooter: {
+    marginTop: 10,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.surfaceBorder
+  },
+  cardFooterEngine: {
+    color: COLORS.t2,
+    fontFamily: FONT_MEDIUM,
+    fontSize: 11
+  },
+  cardFooterDisclaimer: {
+    marginTop: 3,
+    color: COLORS.t3,
+    fontFamily: FONT,
+    fontSize: 11,
+    lineHeight: 16
+  },
+
   // UTILITY STATES
   scalePressed: {
     transform: [{ scale: 0.97 }]
@@ -2270,5 +2821,5 @@ const styles = StyleSheet.create({
   }
 });
 
-registerRootComponent(App);
-export default App;
+registerRootComponent(Root);
+export default Root;

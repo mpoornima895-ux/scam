@@ -1,0 +1,23 @@
+# Dependencies / build output
+node_modules/
+.test-build/
+.expo/
+dist/
+web-build/
+*.log
+
+# Signing material: NEVER commit these
+*.keystore
+*.jks
+keystore.properties
+*.b64
+
+# Local env
+.env
+.env.*
+.dev.vars
+.wrangler/
+
+# OS / IDE
+.DS_Store
+.idea/

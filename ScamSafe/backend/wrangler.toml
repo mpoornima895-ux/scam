@@ -1,0 +1,10 @@
+# Cloudflare Worker config for the ScamSafe analyze endpoint.
+# Deploy:  cd backend && npx wrangler secret put GROQ_API_KEY && npx wrangler deploy
+name = "scamsafe-analyze"
+main = "analyze.js"
+compatibility_date = "2025-01-01"
+
+[vars]
+GROQ_MODEL = "openai/gpt-oss-20b"
+RATE_LIMIT_PER_MIN = "10"
+# GROQ_API_KEY is NOT here on purpose. Set it with `wrangler secret put GROQ_API_KEY`.

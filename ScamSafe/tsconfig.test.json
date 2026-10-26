@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "commonjs",
+    "moduleResolution": "node10",
+    "ignoreDeprecations": "5.0",
+    "target": "ES2019",
+    "noEmit": false,
+    "outDir": ".test-build",
+    "rootDir": ".",
+    "isolatedModules": false
+  },
+  "files": ["src/api.ts", "src/config.ts", "src/redaction.ts", "src/storage.ts", "src/consent.ts"],
+  "include": []
+}

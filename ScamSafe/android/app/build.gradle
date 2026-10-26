@@ -81,15 +81,40 @@ def enableMinifyInReleaseBuilds = (findProperty('android.enableMinifyInReleaseBu
  */
 def jscFlavor = 'io.github.react-native-community:jsc-android:2026004.+'
 
+// [scamsafe] release signing
+def keystoreProps = new Properties()
+def keystorePropsFile = rootProject.file('keystore.properties')
+if (keystorePropsFile.exists()) {
+    keystorePropsFile.withInputStream { keystoreProps.load(it) }
+}
+def signingValue = { String name ->
+    def v = keystoreProps.getProperty(name) ?: findProperty(name) ?: System.getenv(name)
+    return (v == null || v.toString().trim().isEmpty()) ? null : v.toString()
+}
+def releaseStoreFileValue = signingValue('MYAPP_UPLOAD_STORE_FILE')
+def releaseStoreFile = releaseStoreFileValue == null ? null : (new File(releaseStoreFileValue).isAbsolute() ? new File(releaseStoreFileValue) : rootProject.file(releaseStoreFileValue))
+def releaseSigningConfigured = releaseStoreFile != null && releaseStoreFile.exists() &&
+    signingValue('MYAPP_UPLOAD_STORE_PASSWORD') != null &&
+    signingValue('MYAPP_UPLOAD_KEY_ALIAS') != null &&
+    signingValue('MYAPP_UPLOAD_KEY_PASSWORD') != null
+
+// Fail ONLY when a release task is requested. Debug builds and IDE sync are not affected.
+gradle.taskGraph.whenReady { graph ->
+    def releaseRequested = graph.allTasks.any { it.project == project && it.name.contains('Release') }
+    if (releaseRequested && !releaseSigningConfigured) {
+        throw new GradleException('Release keystore not configured. Set MYAPP_UPLOAD_STORE_FILE, MYAPP_UPLOAD_STORE_PASSWORD, MYAPP_UPLOAD_KEY_ALIAS and MYAPP_UPLOAD_KEY_PASSWORD (keystore.properties in android/, ~/.gradle/gradle.properties, or environment variables). See README: "Release signing". Release builds never use the debug key.')
+    }
+}
+
 android {
     ndkVersion rootProject.ext.ndkVersion
 
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'com.anonymous.ScamSafe'
+    namespace 'com.scamsafe.app'
     defaultConfig {
-        applicationId 'com.anonymous.ScamSafe'
+        applicationId 'com.scamsafe.app'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
@@ -98,11 +123,14 @@ android {
         buildConfigField "String", "REACT_NATIVE_RELEASE_LEVEL", "\"${findProperty('reactNativeReleaseLevel') ?: 'stable'}\""
     }
     signingConfigs {
-        debug {
-            storeFile file('debug.keystore')
-            storePassword 'android'
-            keyAlias 'androiddebugkey'
-            keyPassword 'android'
+        // No custom "debug" config: debug builds use Android's auto-generated debug key.
+        release {
+            if (releaseSigningConfigured) {
+                storeFile releaseStoreFile
+                storePassword signingValue('MYAPP_UPLOAD_STORE_PASSWORD')
+                keyAlias signingValue('MYAPP_UPLOAD_KEY_ALIAS')
+                keyPassword signingValue('MYAPP_UPLOAD_KEY_PASSWORD')
+            }
         }
     }
     buildTypes {
@@ -110,9 +138,8 @@ android {
             signingConfig signingConfigs.debug
         }
         release {
-            // Caution! In production, you need to generate your own keystore file.
             // see https://reactnative.dev/docs/signed-apk-android.
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
             def enableShrinkResources = findProperty('android.enableShrinkResourcesInReleaseBuilds') ?: 'false'
             shrinkResources enableShrinkResources.toBoolean()
             minifyEnabled enableMinifyInReleaseBuilds

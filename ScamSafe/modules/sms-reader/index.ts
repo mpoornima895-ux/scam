@@ -1,4 +1,4 @@
-import { EventEmitter, requireNativeModule, type Subscription } from 'expo-modules-core';
+import { NativeModule, requireNativeModule, type EventSubscription } from 'expo-modules-core';
 
 type NativeSms = {
   id: string;
@@ -7,15 +7,21 @@ type NativeSms = {
   date: number;
 };
 
-type SmsReaderNativeModule = {
+// Events emitted by the native Kotlin module (Events("onIncomingSms") in SmsReaderModule.kt)
+type SmsReaderEvents = {
+  onIncomingSms: (message: NativeSms) => void;
+};
+
+// Expo SDK 57: native modules are typed by extending NativeModule with an events map.
+// NativeModule already provides addListener / removeListener / emit.
+declare class SmsReaderNativeModule extends NativeModule<SmsReaderEvents> {
   readRecentSms(days: number, limit: number): Promise<NativeSms[]>;
   startIncomingListener(): void;
   stopIncomingListener(): void;
   isSmsScannerAvailable(): boolean;
-};
+}
 
 const SmsReader = requireNativeModule<SmsReaderNativeModule>('SmsReader');
-const emitter = new EventEmitter(SmsReader);
 
 export async function readRecentSms(days: number, limit: number): Promise<NativeSms[]> {
   const result = await SmsReader.readRecentSms(days, limit);
@@ -23,11 +29,11 @@ export async function readRecentSms(days: number, limit: number): Promise<Native
 }
 
 export function subscribeToIncomingSms(callback: (message: NativeSms) => void): () => void {
-  let subscription: Subscription | null = null;
+  let subscription: EventSubscription | null = null;
 
   try {
     SmsReader.startIncomingListener();
-    subscription = emitter.addListener<NativeSms>('onIncomingSms', callback);
+    subscription = SmsReader.addListener('onIncomingSms', callback);
   } catch {
   }
 
