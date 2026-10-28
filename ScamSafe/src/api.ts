@@ -569,6 +569,147 @@ export function analyzeOfflineFallback(message: string): ApiResult {
     }
   }
 
+  // ------------------------------------------------------------------
+  // 17. v2 rules: phone-fraud wording that often has NO link
+  //     (OTP/PIN/CVV requests, remote-access apps, advance fees, family-emergency money,
+  //      guaranteed-return investing, contact-blackmail, SIM/KYC threats, risky-domain links)
+  // ------------------------------------------------------------------
+  // Sentences that WARN the user ("never share your OTP") must not count as asking for it.
+  const warnWords = /(?:\bnever\b|\bdo\s+not\b|\bdon'?t\b|\bnot\b|\bnahi\b|\bmat\b|\bno\s+one\b|\bnobody\b)\s+(?:[\w']+\s+){0,3}?(?:share|tell|give|disclose|reveal|provide|ask|enter|type|install|download|click|guarantee\w*)[^.!?,;\n]*/gi;
+  const asked = lower.replace(warnWords, ' ');
+
+  const credTarget = '(?:otp|o\\.t\\.p|cvv|cvc|mpin|upi\\s+pin|atm\\s+pin|pin(?!\\s*code)|password|passcode|card\\s+(?:number|details)|security\\s+code)';
+  const credAsk = new RegExp('(?:share|tell|send|give|provide|read\\s+out|forward|bata(?:o|iye|yein)?|bhej(?:o|ein|iye)?)\\s+(?:[\\w]+\\s+){0,4}?' + credTarget + '\\b', 'i');
+  // A message that CONTAINS the OTP value is the genuine code delivery itself (e.g. "share OTP 4821 with the driver"). Scammers ask you to reveal a code that they did not write.
+  const genuineDeliveryOtp = /\botp\b[^.!?\n]{0,25}\b\d{4,8}\b|\b\d{4,8}\b[^.!?\n]{0,25}\botp\b/.test(lower) && !hasUrl;
+  if (credAsk.test(asked) && !genuineDeliveryOtp) {
+    signals.push('Asks you to share an OTP, PIN, CVV or password (a real bank never asks for these)');
+    score = Math.max(score, 82);
+    detectedType = 'OTP / PIN / CVV Theft (Vishing)';
+  }
+
+  const pinToReceive = /(?:receive|receiving|lene|paane|credit|accept)[^.!?\n]{0,50}\bpin\b(?!\s*code)|\bpin\s+(?:enter|daal|dalo|type)\s*(?:kar|karo|karein|karen|kijiye)|\benter\s+(?:kar|karo)\b[^.!?\n]{0,20}\bpin\b/i;
+  if (pinToReceive.test(asked) && /(?:rs\.?|₹|inr|rupaye|paise|money|amount|cashback|refund|aaye)/i.test(asked)) {
+    signals.push('Asks for a PIN to receive money (a PIN is only ever needed to PAY)');
+    score = Math.max(score, 85);
+    detectedType = 'UPI PIN Theft / Collect Request Scam';
+  }
+
+  if (/\b(?:anydesk|any\s+desk|teamviewer|team\s+viewer|quick\s*support|rustdesk|ammyy|airdroid|alpemix)\b/i.test(asked)) {
+    signals.push('Asks you to install a remote-access app (gives the caller control of your phone)');
+    score = Math.max(score, 82);
+    detectedType = 'Remote-Access / Fake Support Scam';
+  }
+
+  if (/(?:has|have|detected|found)\s+(?:a\s+|the\s+)?(?:virus|malware|trojan)|\binfected\b|\bhacked\b/i.test(asked) && /(?:pay|removal|remove|call\s+\d|call\s+us|install|support|technician)/i.test(asked)) {
+    signals.push('Fake tech-support: claims a virus/hack and asks for payment or action');
+    score = Math.max(score, 78);
+    detectedType = 'Fake Tech-Support Scam';
+  }
+
+  const feeWord = /\b(?:customs|visa|processing|registration|clearance|release|booking|shipping|insurance|activation|verification|advance)\s+(?:fee|fees|charges?|payment|amount|deposit)\b|\badvance\s+(?:payment|verification|to\s+book|booking|money|amount)\b|\bpay\s+(?:the\s+)?advance\b|\bpay[^.!?\n]{0,25}\badvance\b/i;
+  const payVerb = /(?:pay|send|transfer|deposit|bhej\w*)\b/i;
+  const advanceLure = /(?:parcel|gift|customs|visa|dubai|abroad|\bjob\b|salary|tenant|\brent\b|prize|\bwon\b|lottery|iphone|laptop|limited\s+stock|refund|soldier|cheap|whatsapp|claim|to\s+receive|to\s+start|to\s+book|to\s+get)/i;
+  if (feeWord.test(asked) && payVerb.test(asked) && advanceLure.test(asked)) {
+    signals.push('Asks you to pay a fee or advance before you receive anything');
+    score = Math.max(score, 78);
+    detectedType = 'Advance-Fee Scam';
+  }
+  if (/customs[^.!?\n]{0,100}(?:rs\.?|₹)\s*[\d,]+|(?:rs\.?|₹)\s*[\d,]+[^.!?\n]{0,60}customs/i.test(asked) && payVerb.test(asked)) {
+    signals.push('Customs / parcel release payment demand');
+    score = Math.max(score, 80);
+    detectedType = 'Fake Customs / Parcel Fee Scam';
+  }
+
+  const familyWord = /\b(?:mum|mom|mummy|dad|papa|bhaiya|didi|beta)\b|relative'?s?\s+friend|friend\s+of\s+your|your\s+relative/i;
+  const familyMoney = /(?:send|need|transfer|bhej\w*|chahiye)[^.!?\n]{0,30}\d[\d,]*|(?:rs\.?|₹|inr)\s*\d[\d,]*/i;
+  const familyMarker = /new\s+number|changed\s+(?:my\s+)?number|phone\s+(?:broke|is\s+broken|lost|damaged|not\s+working|toot|kho|kharab)|naya\s+number|number\s+badal|don'?t\s+call|do\s+not\s+call|will\s+explain\s+later|relative'?s?\s+friend|friend\s+of\s+your|this\s+upi|(?:to|on)\s+this\s+number/i;
+  if (familyWord.test(lower) && familyMoney.test(lower) && familyMarker.test(lower)) {
+    signals.push('Family / friend emergency money request from an unknown or new number');
+    score = Math.max(score, 80);
+    detectedType = 'Family-Emergency Impersonation Scam';
+  }
+
+  const investmentPattern = /guarantee[d]?\s+\d+\s*%|\d{2,4}\s*%\s*(?:returns?|profit|listing\s+gain)[^.!?\n]{0,30}guarantee|guarantee[d]?\s+(?:returns?|profit|income|listing\s+gain)|(?:invest\w*|returns?|profit|money|income)[^.!?\n]{0,40}guarantee|guarantee[^.!?\n]{0,30}(?:invest|returns?|profit|income)|double\s+your\s+(?:money|investment)|(?:invest|deposit)[^.!?\n]{0,30}(?:get|receive|earn)\s+(?:rs\.?|₹)\s*[\d,]+|pre[- ]?ipo\s+allotment|(?:daily|weekly)\s+returns?\s+of\s+\d+\s*%|100\s*%\s*accuracy|(?:vip|premium)\s+(?:stock|trading|crypto)\s+(?:group|tips|calls)|stock\s+tips?[^.!?\n]{0,60}whatsapp\s+group/i;
+  if (investmentPattern.test(asked)) {
+    signals.push('Guaranteed-return / get-rich investment pitch');
+    score = Math.max(score, 80);
+    detectedType = 'Investment / Stock-Tip Fraud';
+  }
+
+  const extortionPattern = /(?:send|share|forward|circulate|post|leak|bhej)[^.!?\n]{0,60}(?:contacts?|family|friends|employer|relatives|colleagues|office)/i;
+  const extortionContext = /(?:photos?|pictures?|videos?|images?|notice|private|morphed|\bthem\b|data)/i;
+  const extortionPressure = /(?:\bpay|payment|\bor\b|warna|agar|otherwise|\belse\b|tonight|today|overdue|defaulted)/i;
+  const extortionPassive = /(?:notice|photos?)[^.!?\n]{0,30}(?:family|employer|contacts?|relatives)[^.!?\n]{0,40}(?:will\s+be\s+(?:sent|shared)|tonight|bheja\s+jayega)/i;
+  const extortionHinglish = /(?:aapke|tumhare|apne|aapki|tumhari)\s+(?:saare\s+|sabhi\s+)?contacts?\s+ko/i;
+  if ((extortionPattern.test(asked) && extortionContext.test(asked) && extortionPressure.test(asked)) || extortionPassive.test(asked) || extortionHinglish.test(asked)) {
+    signals.push('Threatens to send your photos or notices to your contacts, family or employer');
+    score = Math.max(score, 85);
+    detectedType = 'Loan App Extortion / Harassment';
+  }
+
+  // Fake police: a "case" plus a demand for money, or secrecy plus a case.
+  if (lawEnforcementWord && caseRegistered && (/(?:pay|transfer|settle|settlement|fine|deposit)[^.!?\n]{0,30}(?:rs\.?|₹|inr)?\s*\d|(?:rs\.?|₹|inr)\s*[\d,]+[^.!?\n]{0,30}(?:settle|fine|bail|penalty)|(?:do\s+not|don'?t)\s+tell\s+anyone/i.test(lower))) {
+    signals.push('Fake police case combined with a payment or secrecy demand');
+    score = Math.max(score, 85);
+    detectedType = 'Fake Police / Cyber-Crime Arrest Scam';
+  }
+
+  // Prize claimed without a number in the wording ("you won a phone in lucky draw ... send Rs 499 to claim").
+  if (/(?:you\s+(?:have\s+)?won|you\s+are\s+(?:the\s+)?(?:lucky\s+)?winner|lucky\s+draw|jeet\s+gaye)/i.test(lower) && /(?:send|pay|deposit|bhej)[^.!?\n]{0,30}(?:rs\.?|₹|inr)\s*\d|\bclaim\b|contact\s+(?:mr|manager)/i.test(lower) && !(hasUrl && allUrlsTrusted)) {
+    signals.push('Prize claim that needs a payment or contact to collect');
+    score = Math.max(score, 78);
+    detectedType = 'Lottery / Prize Scam';
+  }
+
+  // A real utility asking you to pay on its OWN official (trusted) site is not an extortion call.
+  if (electricityPattern.test(lower) && hasUrl && allUrlsTrusted && !/\b[6-9]\d{9}\b/.test(lower)) {
+    signals.push('Utility reminder pointing only to an official website');
+    score = Math.min(score, 15);
+    detectedType = NO_PATTERN_LABEL;
+  }
+
+  const simBlock = /\bsim(?:\s+card)?\b[^.!?\n]{0,40}(?:blocked|deactivated|suspended|disconnected|band\s+ho)/i.test(lower);
+  if (simBlock && (/\b[6-9]\d{9}\b/.test(lower) || /re-?verif|kyc/.test(lower))) {
+    signals.push('SIM-block threat with a verification call or KYC demand');
+    score = Math.max(score, 80);
+    detectedType = 'SIM Block / Verification Scam';
+  }
+
+  const kycThreatNoLink =
+    /\bkyc\b/.test(lower) &&
+    /(?:expir|pending|incomplete|not\s+updated|overdue)/.test(lower) &&
+    /(?:frozen|blocked|closed|suspend|deactivat|restrict)/.test(lower) &&
+    /(?:reply\s+(?:yes|y|1)\b|\b[6-9]\d{9}\b|whatsapp)/.test(lower);
+  if (kycThreatNoLink) {
+    signals.push('KYC-expiry threat asking you to reply or call a mobile number');
+    score = Math.max(score, 78);
+    detectedType = 'Bank KYC Impersonation Scam';
+  }
+
+  if (lotteryPattern.test(lower) && /claim|contact|call|reply|send|fee|manager|pay|bank\s+details|aadhaar/.test(lower) && !(hasUrl && allUrlsTrusted)) {
+    score = Math.max(score, 78);
+    detectedType = 'Lottery / Prize Scam';
+  }
+
+  // Risky link + an action word that scammers use. A real company does not ask this from a .click/.top/.site address.
+  const linkAction = /\b(?:kyc|account|blocked?|closed|suspend\w*|verify|verification|update|refund|claim|login|log\s+in|pending|confirm|fine|challan|subsidy|scheme|licen[sc]e|payment|pay|bonus|cashback|recharge|billing|subscription|activate)\b/i;
+  if (hasUrl && !allUrlsTrusted && hasSuspiciousDomain && linkAction.test(lower)) {
+    signals.push('Risky website address combined with a verify / pay / claim request');
+    score = Math.max(score, 78);
+  }
+  if (hasUrl && !allUrlsTrusted && /bit\.ly|tinyurl|is\.gd|cutt\.ly|ow\.ly|rb\.gy/i.test(text) && /\b(?:kyc|account|blocked?|closed|suspend\w*|verify|verification|refund|pending|login|confirm|fine)\b/i.test(lower)) {
+    signals.push('Shortened link hiding the destination of a verify / account request');
+    score = Math.max(score, 76);
+  }
+
+  // Messages that only WARN about scams (no link, no phone number, no payment request) are not scams.
+  const awarenessMsg = /\b(?:beware|be\s+aware|stay\s+(?:alert|safe|vigilant)|awareness|fraud\s+alert|safety\s+tip|public\s+notice)\b/i.test(lower.slice(0, 60)) || /(?:will|does|do)\s+never\s+(?:ask|call|request|demand)/i.test(lower);
+  if (awarenessMsg && !hasUrl && !/\b[6-9]\d{9}\b/.test(lower) && !/(?:pay|send|transfer)\s+(?:rs\.?|₹|inr)\s*\d/.test(lower) && !credAsk.test(asked)) {
+    score = Math.min(score, 25);
+    detectedType = 'Safety awareness message';
+  }
+
   // Boundary clipping & Final risk classification
   score = Math.min(100, Math.max(5, score));
   let level: 'High' | 'Medium' | 'Low' = 'Low';
