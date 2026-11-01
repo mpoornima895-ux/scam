@@ -222,7 +222,7 @@ function App({ onDataDeleted }: { onDataDeleted: () => void }): React.JSX.Elemen
 
     for (const message of messages) {
       try {
-        const result = await analyzeMessage(message.body);
+        const result = await analyzeMessage(message.body, { source: 'sms' });
         if (!result) {
           continue;
         }
@@ -312,7 +312,7 @@ function App({ onDataDeleted }: { onDataDeleted: () => void }): React.JSX.Elemen
         return;
       }
       try {
-        const result = await analyzeMessage(message.body);
+        const result = await analyzeMessage(message.body, { source: 'sms' });
         if (!result) {
           return;
         }
@@ -395,7 +395,7 @@ function App({ onDataDeleted }: { onDataDeleted: () => void }): React.JSX.Elemen
         setScanDone(index);
 
         try {
-          const result = await analyzeMessage(message.body);
+          const result = await analyzeMessage(message.body, { source: 'sms' });
           if (result) {
             const entry = mapAnalyzedToEntry(message, result);
             const next = await addEntry(entry);
@@ -439,7 +439,7 @@ function App({ onDataDeleted }: { onDataDeleted: () => void }): React.JSX.Elemen
     setManualResult(null);
 
     try {
-      const result = await analyzeMessage(manualText.trim());
+      const result = await analyzeMessage(manualText.trim(), { source: 'manual' });
       if (!result) {
         Alert.alert('Analysis failed', 'Could not analyze this message right now.');
         return;
@@ -918,6 +918,11 @@ function App({ onDataDeleted }: { onDataDeleted: () => void }): React.JSX.Elemen
           <View style={styles.panel}>
             <Text style={styles.panelTitle}>Manual Text Check</Text>
             <Text style={styles.panelSub}>Paste a suspicious SMS, UPI alert, bank text, or phishing link</Text>
+            {CLOUD_ENABLED ? (
+              <Text style={styles.helperText}>
+                Text you paste here is also double-checked by our cloud AI (card numbers, OTPs and phone numbers hidden). Messages from your inbox never leave your phone.
+              </Text>
+            ) : null}
             <TextInput
               accessible={true}
               accessibilityLabel="Suspicious SMS message input field"
@@ -1396,16 +1401,16 @@ function ConsentScreen({
         </Text>
 
         <ConsentBlock title="What it reads">
-          Your SMS messages. After you tap "I agree", Android will ask for permission to read and receive SMS. ScamSafe looks at your 10 most recent messages from the last 7 days when you scan, and at new messages as they arrive while Auto-Scan is on.
+          ScamSafe reads your SMS messages, using Android's Read SMS and Receive SMS permissions, only to find scam and phishing messages and warn you. After you tap "I agree", Android will ask for permission. ScamSafe looks at your 10 most recent messages from the last 7 days when you scan, and at new messages as they arrive while Auto-Scan is on and the app is running.
         </ConsentBlock>
 
         <ConsentBlock title="Where the checking happens">
-          On your phone. The scam rules run on your device, and your scan results are saved on this phone only.
+          On your phone. Every message from your inbox is checked on your device only and is never uploaded. Your scan results are saved on this phone only.
         </ConsentBlock>
 
         {CLOUD_ENABLED ? (
           <ConsentBlock title="Cloud check">
-            To double-check, the text of the messages you scan is sent to our cloud AI service. Before it leaves your phone, card numbers, OTPs, Aadhaar numbers, phone numbers and bank account numbers are replaced with placeholders. Other text, such as names, amounts and links, is not hidden. If the cloud service cannot be reached, your phone does the check alone. Every result tells you which way it was checked.
+            Only when you paste a message yourself into "Manual Text Check", that pasted text is also sent to our cloud AI service for a second opinion. Before it leaves your phone, card numbers, OTPs, Aadhaar numbers, phone numbers and bank account numbers are replaced with placeholders. Other text, such as names, amounts and links, is not hidden. Messages from your inbox are never sent. If the cloud service cannot be reached, your phone does the check alone. Every result tells you which way it was checked.
           </ConsentBlock>
         ) : (
           <ConsentBlock title="Cloud check">
@@ -1414,7 +1419,7 @@ function ConsentScreen({
         )}
 
         <ConsentBlock title="Nothing is sold or shared">
-          We do not sell your data and we do not share it with advertisers or other companies.{CLOUD_ENABLED ? ' The masked text is processed by our AI provider only to produce your result.' : ''}
+          We do not sell your data and we do not share it with advertisers or other companies.{CLOUD_ENABLED ? ' The masked text you paste into Manual Text Check is processed by our AI provider only to produce your result.' : ''}
         </ConsentBlock>
 
         <ConsentBlock title="Delete everything, any time">

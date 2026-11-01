@@ -96,3 +96,24 @@ test('honest confidence: null when no signal, derived from score otherwise', asy
   assert.equal(hit.confidence, Math.min(0.99, hit.risk_score / 100));
   assert.notEqual(hit.confidence, 0.85);
 });
+
+// ---- Play-policy rule: inbox SMS text is checked on the phone only ----
+test('SMS-sourced text is NEVER sent to the cloud by default (CLOUD_FOR_SMS_SCANS=false)', async () => {
+  let called = false;
+  const r = await analyzeMessage(SCAM, { source: 'sms', analyzeUrl: URL_, fetchImpl: async () => { called = true; return {}; } });
+  assert.equal(called, false);
+  assert.equal(r.engine, 'on_device_rules');
+});
+
+test('pasted (manual) text still gets the cloud check', async () => {
+  let called = false;
+  const r = await analyzeMessage(BENIGN, { source: 'manual', analyzeUrl: URL_, fetchImpl: async () => { called = true; return okResponse(cloudVerdict(10))(); } });
+  assert.equal(called, true);
+  assert.equal(r.engine, 'cloud_ai');
+});
+
+test('cloudForSms override sends SMS text (only for builds that turn it on)', async () => {
+  let called = false;
+  await analyzeMessage(BENIGN, { source: 'sms', cloudForSms: true, analyzeUrl: URL_, fetchImpl: async () => { called = true; return okResponse(cloudVerdict(10))(); } });
+  assert.equal(called, true);
+});

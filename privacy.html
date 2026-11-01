@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ScamSafe Privacy Policy</title>
+<style>body{font-family:system-ui,Segoe UI,Roboto,sans-serif;max-width:46rem;margin:0 auto;padding:1rem 16px 3rem;line-height:1.55;color:#1b1b1f;background:#fff}
+h1{font-size:1.7rem}h2{font-size:1.2rem;margin-top:2rem}li{margin:.35rem 0}@media(prefers-color-scheme:dark){body{color:#e8e8ee;background:#101014}}</style></head>
+<body>
+<h1>ScamSafe Privacy Policy</h1>
+<p><em>Last updated: 1 November 2026.</em></p>
+<p><strong>Developer:</strong> PremKumar.M</p>
+<p><strong>Privacy contact:</strong> premkumarqu@gmail.com</p>
+<p>ScamSafe is an Android app that reads your SMS messages to find scam and phishing messages and warn you. This page</p>
+<p>says exactly what it reads, where it is processed, what is stored and how to delete it.</p>
+<h2>What ScamSafe reads and why</h2>
+<ul>
+<li><strong>SMS messages</strong>, through the Android permissions <strong>READ<em>SMS</strong> and <strong>RECEIVE</em>SMS</strong>. They are used for one purpose</li>
+</ul>
+<p>  only: to detect scam and phishing messages and show you a warning. They are not used for advertising, profiling,</p>
+<p>  research or anything else.</p>
+<ul>
+<li>Android asks for these permissions only <strong>after</strong> you tap <strong>I agree</strong> on the &quot;Before you start&quot; screen. If you tap</li>
+</ul>
+<p>  <strong>No thanks</strong>, nothing is read.</p>
+<ul>
+<li>When you scan, ScamSafe reads up to your 10 most recent messages from the last 7 days. While Auto-Scan is on and the</li>
+</ul>
+<p>  app is running, it also checks new messages as they arrive.</p>
+<h2>Where the checking happens</h2>
+<ul>
+<li><strong>Messages from your inbox are checked on your phone only. They are never uploaded.</strong> Scanning does not need the</li>
+</ul>
+<p>  internet.</p>
+<h2>Text you paste yourself (Manual Text Check)</h2>
+<ul>
+<li>If you paste a message into <strong>Manual Text Check</strong>, a masked copy of that pasted text is also sent to our server for a</li>
+</ul>
+<p>  second opinion from an AI model. This happens only for text you paste yourself.</p>
+<ul>
+<ul>
+<li><strong>Masked first, on your phone:</strong> card numbers, OTP / verification codes, Aadhaar numbers, phone numbers and bank</li>
+</ul>
+</ul>
+<p>    account numbers are replaced with placeholders before anything is sent.</p>
+<ul>
+<ul>
+<li><strong>Not masked:</strong> other text, such as names, amounts, UPI IDs and links, is sent as written.</li>
+<li>Up to <strong>1000 characters</strong> are sent over an encrypted HTTPS connection to the ScamSafe server (not directly to an AI</li>
+</ul>
+</ul>
+<p>    provider). The sender&#x27;s number is not sent.</p>
+<ul>
+<ul>
+<li>A random <strong>install id</strong> (not linked to your phone, SIM or account) is sent with the request, and the server sees</li>
+</ul>
+</ul>
+<p>    your IP address, only to limit abuse (rate limiting).</p>
+<ul>
+<ul>
+<li>The server passes the masked text to an AI provider (currently Groq) to produce the verdict. The ScamSafe server does</li>
+</ul>
+</ul>
+<p>    not write message text to logs or a database. The provider processes the text only to produce your result.</p>
+<ul>
+<ul>
+<li>If the cloud service fails or takes longer than 10 seconds, your phone&#x27;s own result is used.</li>
+<li>The cloud answer can only make a result <strong>more</strong> cautious, never less.</li>
+</ul>
+<li>Each result shows how it was checked: <strong>&quot;Checked on your phone only&quot;</strong> or <strong>&quot;Checked with cloud AI (personal numbers hidden)&quot;</strong>.</li>
+</ul>
+<h2>What is stored on your phone</h2>
+<ul>
+<li>Your scan history: the <strong>full original message text</strong>, sender, time and the result. It is kept in the app&#x27;s private</li>
+</ul>
+<p>  storage on this phone, is not backed up (backup is disabled) and is not uploaded.</p>
+<ul>
+<li>Your settings (Auto-Scan on/off), the record that you agreed and a random install id.</li>
+</ul>
+<h2>Nothing is sold or shared</h2>
+<ul>
+<li>We do not sell your data, and we do not share it with advertisers or data brokers.</li>
+<li>The only other party that can receive text is the AI provider described above, only for text you paste, only after</li>
+</ul>
+<p>  masking, and only to produce your result.</p>
+<h2>Security</h2>
+<ul>
+<li>Data sent to our server travels over HTTPS (TLS). The app contains no AI provider key; keys are kept only on our server.</li>
+<li>The server limits message length and the number of requests per user.</li>
+</ul>
+<h2>Retention and deleting your data</h2>
+<ul>
+<li>On your phone: open the menu (top left) → <strong>Delete all my data</strong>. This removes the scan history, settings, your consent</li>
+</ul>
+<p>  and the install id, and shows &quot;Before you start&quot; again. You can also delete one scan from History, or use <strong>Clear</strong>.</p>
+<ul>
+<li>To remove the SMS permission: Android Settings → Apps → ScamSafe → Permissions. Uninstalling the app removes all local data.</li>
+<li>Our server does not store message text, so there is nothing to delete there. Server request counters used for rate</li>
+</ul>
+<p>  limiting are short-lived and are not linked to your identity.</p>
+<h2>Children</h2>
+<ul>
+<li>ScamSafe is not directed at children under 13.</li>
+</ul>
+<h2>Limits</h2>
+<ul>
+<li>ScamSafe can miss scams and can flag genuine messages. It is not a guarantee of safety. If money or an OTP is involved,</li>
+</ul>
+<p>  call your bank.</p>
+<h2>Changes and contact</h2>
+<p>If this policy changes, the new version will be published at the Privacy policy link in the app (menu → Privacy policy).</p>
+<p>Questions or deletion help: premkumarqu@gmail.com</p>
+</body></html>

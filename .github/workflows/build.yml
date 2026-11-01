@@ -57,7 +57,7 @@ jobs:
           GRADLE_OPTS: "-Dorg.gradle.daemon=false -Xmx3g"
         run: |
           chmod +x android/gradlew
-          cd android && ./gradlew assembleRelease --no-daemon
+          cd android && ./gradlew assembleRelease bundleRelease --no-daemon
 
       - name: Verify APK is signed and NOT debug-signed
         run: |
@@ -74,6 +74,20 @@ jobs:
             exit 1
           fi
 
+      - name: Report target SDK (Google Play needs 36 or higher)
+        run: |
+          APK=android/app/build/outputs/apk/release/app-release.apk
+          AAPT=$(find "$ANDROID_HOME/build-tools" -name aapt2 2>/dev/null | sort -V | tail -1)
+          if [ -z "$AAPT" ]; then
+            echo "::warning::aapt2 not found, skipping target SDK check"
+            exit 0
+          fi
+          "$AAPT" dump badging "$APK" | grep -E "^(package|sdkVersion|targetSdkVersion|uses-permission)" | tee "$RUNNER_TEMP/badging.txt"
+          TARGET=$(grep -oP "targetSdkVersion:'\K[0-9]+" "$RUNNER_TEMP/badging.txt" | head -1)
+          if [ -z "$TARGET" ] || [ "$TARGET" -lt 36 ]; then
+            echo "::warning::targetSdkVersion is '$TARGET'. Google Play needs 36 or higher for new apps. Pilot APKs still work, but do not upload this build to Play."
+          fi
+
       - name: Remove keystore from runner
         if: always()
         run: rm -f "$RUNNER_TEMP/release.keystore"
@@ -82,3 +96,8 @@ jobs:
         with:
           name: ScamSafe-release-apk
           path: ScamSafe/android/app/build/outputs/apk/release/app-release.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ScamSafe-release-aab-for-Play
+          path: ScamSafe/android/app/build/outputs/bundle/release/app-release.aab

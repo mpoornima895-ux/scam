@@ -1,4 +1,4 @@
-import { ANALYZE_MAX_CHARS, ANALYZE_TIMEOUT_MS, ANALYZE_URL } from './config';
+import { ANALYZE_MAX_CHARS, ANALYZE_TIMEOUT_MS, ANALYZE_URL, CLOUD_FOR_SMS_SCANS } from './config';
 import { redactSensitiveData } from './redaction';
 
 export type ApiResult = {
@@ -46,6 +46,13 @@ type AnalyzeOptions = {
   /** Inject fetch (used by unit tests). */
   fetchImpl?: (url: string, init: any) => Promise<any>;
   timeoutMs?: number;
+  /**
+   * Where the text came from. 'sms' = read from the user's inbox / incoming SMS; 'manual' = pasted by the user.
+   * SMS-sourced text is never sent to the cloud unless CLOUD_FOR_SMS_SCANS (or cloudForSms) is true.
+   */
+  source?: 'sms' | 'manual';
+  /** Override CLOUD_FOR_SMS_SCANS (used by unit tests). */
+  cloudForSms?: boolean;
 };
 
 /**
@@ -74,7 +81,8 @@ export async function analyzeMessage(message: string, options: AnalyzeOptions = 
 
   const local = analyzeOfflineFallback(text);
 
-  const url = (options.analyzeUrl ?? ANALYZE_URL).trim();
+  const cloudForSms = options.cloudForSms ?? CLOUD_FOR_SMS_SCANS;
+  const url = options.source === 'sms' && !cloudForSms ? '' : (options.analyzeUrl ?? ANALYZE_URL).trim();
   if (!url) {
     return local;
   }
