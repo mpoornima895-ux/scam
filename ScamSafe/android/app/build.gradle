@@ -114,7 +114,7 @@ android {
 
     namespace 'com.scamsafe.app'
     defaultConfig {
-        applicationId 'com.scamsafe.app'
+        applicationId 'com.premkumar.scamsafe'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

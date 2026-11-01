@@ -15,7 +15,7 @@
       "backgroundColor": "#050508"
     },
     "android": {
-      "package": "com.scamsafe.app",
+      "package": "com.premkumar.scamsafe",
       "permissions": [
         "android.permission.READ_SMS",
         "android.permission.RECEIVE_SMS"
