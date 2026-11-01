@@ -238,7 +238,8 @@ const TRUSTED_BRAND_BASES = [
   'delhivery.com', 'bluedart.com',
   'airtel.in', 'jio.com', 'myvi.in',
   'paytm.com', 'phonepe.com',
-  'irctc.co.in', 'makemytrip.com'
+  'irctc.co.in', 'makemytrip.com',
+  'amazonpay.in', 'sbicard.com', 'hdfclife.com', 'hdfcergo.com', 'iciciprulife.com', 'icicilombard.com', 'icicidirect.com'
 ];
 
 /** Government namespaces: only government bodies can register under these. */
@@ -701,6 +702,71 @@ export function analyzeOfflineFallback(message: string): ApiResult {
   if (hasUrl && !allUrlsTrusted && /bit\.ly|tinyurl|is\.gd|cutt\.ly|ow\.ly|rb\.gy/i.test(text) && /\b(?:kyc|account|blocked?|closed|suspend\w*|verify|verification|refund|pending|login|confirm|fine)\b/i.test(lower)) {
     signals.push('Shortened link hiding the destination of a verify / account request');
     score = Math.max(score, 76);
+  }
+
+  // ------------------------------------------------------------------
+  // 18. v3 rules: look-alike domains, job/bonus fees, Hinglish electricity, gift/prize fees,
+  //     and a guard so "police / CBI" words alone (seminars, notices) are not a scam.
+  // ------------------------------------------------------------------
+  const phoneInText = /\b[6-9]\d{9}\b/.test(lower);
+
+  // Brand look-alike website (e.g. hdfc-verify.co.in) + a verify / pay / update request = High even on .com/.in/.org
+  if (hasUrl && !allUrlsTrusted && urlMatches.some(url => !isTrustedDomain(url) && brandWordInHost(url) !== null) &&
+      /\b(?:verify|verification|update|pay|payment|login|log\s+in|confirm|kyc|blocked?|suspend\w*|claim|refund|reward|activate|expire[sd]?|renew)\b/i.test(lower)) {
+    signals.push('Look-alike of a bank/brand website combined with a verify / pay / update request');
+    score = Math.max(score, 80);
+  }
+
+  // Job / bonus scams that ask for money first
+  const jobWord = /\b(?:job|work|earn\w*|task|salary|hiring|income|bonus|commission|vacancy|internship)\b/i;
+  const jobFee = /(?:joining|registration|training|security|kit|refundable|onboarding|activation)\s+(?:deposit|fee|fees|charges?|amount)|(?:deposit|pay|send|transfer)[^.!?\n]{0,40}(?:to\s+(?:join|start|activate|unlock|withdraw|release)|joining)/i;
+  if (jobWord.test(asked) && jobFee.test(asked) && payVerb.test(asked)) {
+    signals.push('Job / earning offer that asks you to pay a deposit or fee first');
+    score = Math.max(score, 80);
+    detectedType = 'Fake Job / Registration-Fee Scam';
+  }
+  if (/(?:pay|send|transfer|deposit)[^.!?\n]{0,30}(?:tax|gst|fee|fees|charges?)[^.!?\n]{0,40}(?:to\s+)?(?:release|withdraw|unlock|claim|receive)[^.!?\n]{0,20}(?:bonus|reward|prize|amount|winnings?|payout|cashback)/i.test(asked)) {
+    signals.push('Asks for a tax or fee before releasing a bonus / reward');
+    score = Math.max(score, 80);
+    detectedType = 'Advance-Fee Scam';
+  }
+
+  // Hinglish electricity cut-off threat (words may sit between "bijli connection" and "kat")
+  if (/(?:bijli|electricity|light)[^.!?\n]{0,50}(?:\bkat\b|\bkaat\b|\bkat\s+(?:di|jayega|jayegi|jaye|diya)|band\s+(?:ho|kar)|disconnect)/i.test(lower) &&
+      (phoneInText || /(?:aaj\s+raat|tonight|abhi|turant|officer|call\s+kar)/i.test(lower)) && !(hasUrl && allUrlsTrusted)) {
+    signals.push('Hinglish electricity disconnection threat with an urgent call / action demand');
+    score = Math.max(score, 80);
+    detectedType = 'Electricity Bill Fraud / Extortion';
+  }
+
+  // Gift / parcel that needs a shipping or handling fee
+  if (payVerb.test(asked) && (/(?:shipping|delivery|courier|handling)\s*(?:fee|fees|charges?|cost)?[^.!?\n]{0,40}(?:gift|prize|parcel|reward|receive)|(?:gift|prize|reward|parcel)[^.!?\n]{0,60}(?:shipping|delivery|courier|handling)\s+(?:fee|fees|charges?|cost)/i.test(asked)) &&
+      /(?:rs\.?|₹|inr)\s*\d|\bfee\b|\bcharges?\b/i.test(asked)) {
+    signals.push('Gift / prize that needs a shipping or handling fee');
+    score = Math.max(score, 78);
+    detectedType = 'Advance-Fee Scam';
+  }
+
+  // Prize claimed through an e-mail address
+  if (/(?:lottery|lucky\s+draw|winner|prize|jackpot|you\s+(?:have\s+)?won)/i.test(lower) && /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/i.test(text) && /(?:claim|contact|send|reply|mail|email)/i.test(lower)) {
+    signals.push('Prize claim that tells you to write to an e-mail address');
+    score = Math.max(score, 78);
+    detectedType = 'Lottery / Prize Scam';
+  }
+
+  // Shortened link + reward / claim wording + an amount of money
+  if (hasUrl && !allUrlsTrusted && /bit\.ly|tinyurl|is\.gd|cutt\.ly|ow\.ly|rb\.gy/i.test(text) &&
+      /\b(?:claim|reward|prize|gift|won|winner|lucky|refund|cashback|free\s+recharge)\b/i.test(lower) && /(?:rs\.?|₹|inr)\s*\d/i.test(lower)) {
+    signals.push('Shortened link promising money or a reward');
+    score = Math.max(score, 76);
+  }
+
+  // "CBI / police" words with NO threat, payment, link or phone number (e.g. a college seminar notice) are not a scam.
+  if (digitalArrestPattern.test(lower) && !hasUrl && !phoneInText &&
+      /(?:seminar|awareness|workshop|webinar|session|lecture|guest\s+talk|college|school|students?|campaign|training\s+program|conference)/i.test(lower) &&
+      !/(?:arrest|warrant|\bcase\b|\bfir\b|\bpay\b|transfer|\bfine\b|penalty|custody|jail|detain|illegal|video\s+call|skype|aadhaar|account|parcel|settle|deposit|urgent|immediately)/i.test(lower)) {
+    score = Math.min(score, 15);
+    detectedType = NO_PATTERN_LABEL;
   }
 
   // Messages that only WARN about scams (no link, no phone number, no payment request) are not scams.

@@ -71,3 +71,44 @@ test('money / job / refund words WITHOUT a hosting link are not raised by this r
   const r = analyzeOfflineFallback('Your refund of Rs 540 has been credited to your account. Thank you for shopping.');
   assert.ok(!/Free hosting/.test(r.scam_signals.join(' ')));
 });
+
+// ---- v2 rules (OTP/PIN asks, remote access, advance fee, family emergency, investment, extortion) ----
+test('v2: asking you to SHARE an OTP / PIN / CVV is flagged High', () => {
+  high('Sir this is bank fraud department. Share the OTP you just received to block the transaction.');
+  high('Your card reward is ready. Tell us your PIN and CVV to process cashback.');
+});
+
+test('v2: remote-access apps, advance fees, family emergency, investment, extortion', () => {
+  high('Install AnyDesk so we can process your refund.');
+  high('Pay Rs 20,000 visa processing fee to start your Dubai job.');
+  high('Hi Mum this is my new number, my phone broke. Please send Rs 15,000 urgently.');
+  high('Double your money in 15 days! Invest Rs 20,000 get Rs 40,000.');
+  high('URGENT: your loan is overdue. We will send your photos to all your contacts, pay today.');
+});
+
+test('v2: warnings and real OTP messages are NOT flagged', () => {
+  low('482913 is your OTP for HDFC NetBanking. Do not share it with anyone. Bank never asks for OTP.');
+  low('Never share your OTP, PIN or CVV with anyone, even if they claim to be from the bank. -SBI');
+  low('Uber: share OTP 4821 with the driver to start your ride.');
+  low('Hi Mum, I reached home safely. Will call you in the evening.');
+});
+
+// ---- v3 rules (look-alike domains, job/bonus fees, Hinglish electricity, gift fee, police seminar) ----
+test('v3: look-alike bank domain on a normal extension plus a verify request is High', () => {
+  high('HDFC Bank: your account needs verification. Update now at https://hdfc-verify.co.in/login');
+  high('Flipkart: your refund is ready. Claim it at https://flipkart-update.org/refund');
+});
+
+test('v3: job deposit, bonus tax, Hinglish electricity, gift fee, e-mail prize', () => {
+  high('Work from home job offer. Pay Rs 2,000 joining deposit to start earning Rs 5000 daily.');
+  high('Your Rs 10,000 bonus is ready. Pay Rs 500 tax to release the bonus.');
+  high('Aapka bijli connection aaj raat kat jayega. Turant call karein 9876543210.');
+  high('You have a gift parcel. Pay Rs 350 shipping fee to receive the gift.');
+  high('Congratulations, you won a lottery of Rs 25 lakh. Email your details to claim@lottery-win.com to claim.');
+});
+
+test('v3: police-word seminar notice and real brand domains are NOT flagged', () => {
+  low('Meeting with CBI officers scheduled for the college cyber safety seminar on Friday at 11 AM in the auditorium.');
+  low('Amazon Pay: Rs 500 added to your wallet. View: https://www.amazonpay.in/wallet');
+  low('Your SBI Card statement is ready. View at https://www.sbicard.com/statement');
+});
