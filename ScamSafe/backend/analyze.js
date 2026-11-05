@@ -133,11 +133,26 @@ export async function handleRequest(request, env = {}, deps = {}) {
 
   if (request.method !== 'POST') return json(405, { error: 'Method not allowed' });
 
+  // --- kill switch: set CLOUD_DISABLED=1 to pause cloud checks (app keeps working on-device) ---
+  if (String(env.CLOUD_DISABLED || '') === '1') return json(503, { error: 'Cloud check is paused. On-device protection still works.' });
+
   // --- rate limit (per IP AND per install id) ---
   const limit = Number(env.RATE_LIMIT_PER_MIN) > 0 ? Number(env.RATE_LIMIT_PER_MIN) : DEFAULT_RATE_LIMIT_PER_MIN;
   const ip = request.headers.get('CF-Connecting-IP') || request.headers.get('X-Forwarded-For') || 'unknown-ip';
   const rawInstall = request.headers.get('X-Install-Id') || '';
   const installId = /^[A-Za-z0-9_-]{8,64}$/.test(rawInstall) ? rawInstall : '';
+  // --- block list (comma-separated env vars BLOCKED_IDS / BLOCKED_IPS) ---
+  const listHas = (v, x) => !!x && String(v || '').split(',').map(s => s.trim()).filter(Boolean).includes(x);
+  if (listHas(env.BLOCKED_IPS, ip) || listHas(env.BLOCKED_IDS, installId)) {
+    return json(403, { error: 'Access removed: this device was blocked for misuse. Contact support if this is a mistake.' });
+  }
+  // --- optional Cloudflare Rate Limiting binding (used only when configured) ---
+  if (env.RATE_LIMITER && typeof env.RATE_LIMITER.limit === 'function') {
+    try {
+      const { success } = await env.RATE_LIMITER.limit({ key: installId ? `id:${installId}` : `ip:${ip}` });
+      if (!success) return json(429, { error: 'Too many requests. Try again in a minute.' });
+    } catch { /* if the binding fails, the in-memory limiter below still applies */ }
+  }
   if (!allowRequest(store, `ip:${ip}`, now, limit) || (installId && !allowRequest(store, `id:${installId}`, now, limit))) {
     return json(429, { error: 'Too many requests. Try again in a minute.' });
   }

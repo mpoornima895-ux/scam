@@ -8,3 +8,14 @@ compatibility_date = "2025-01-01"
 GROQ_MODEL = "openai/gpt-oss-20b"
 RATE_LIMIT_PER_MIN = "10"
 # GROQ_API_KEY is NOT here on purpose. Set it with `wrangler secret put GROQ_API_KEY`.
+
+# Kill switch / block lists (set in Cloudflare dashboard or here, then redeploy):
+#   CLOUD_DISABLED = "1"                 -> pauses cloud checks, app keeps working on-device
+#   BLOCKED_IDS = "id1,id2"  BLOCKED_IPS = "1.2.3.4"
+# Needs wrangler >= 4.36. Limit is per Cloudflare location and approximate.
+[[ratelimits]]
+name = "RATE_LIMITER"
+namespace_id = "1001"
+  [ratelimits.simple]
+  limit = 10
+  period = 60

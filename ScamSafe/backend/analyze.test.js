@@ -120,3 +120,30 @@ test('normalizeVerdict: derives level from score, caps text, rejects missing sco
   assert.equal(normalizeVerdict('nope'), null);
   assert.ok(normalizeVerdict(JSON.stringify({ risk_score: 5, explanation: 'x'.repeat(9000) })).explanation.length <= 400);
 });
+
+test('kill switch pauses cloud checks without calling the provider', async () => {
+  const f = upstream(modelJson(goodModel));
+  const r = await handleRequest(post({ text: 'hello there friend' }), { ...env, CLOUD_DISABLED: '1' }, { fetch: f, store: new Map() });
+  assert.equal(r.status, 503);
+  assert.equal(f.calls.length, 0);
+});
+
+test('blocked install ids and IPs get 403 and never reach the provider', async () => {
+  const f = upstream(modelJson(goodModel));
+  const e = { ...env, BLOCKED_IDS: 'bad-install-1, other-id-22', BLOCKED_IPS: '6.6.6.6' };
+  const byId = await handleRequest(post({ text: 'hello there friend' }, { 'X-Install-Id': 'bad-install-1' }), e, { fetch: f, store: new Map() });
+  assert.equal(byId.status, 403);
+  const byIp = await handleRequest(post({ text: 'hello there friend' }, { 'CF-Connecting-IP': '6.6.6.6' }), e, { fetch: f, store: new Map() });
+  assert.equal(byIp.status, 403);
+  assert.equal(f.calls.length, 0);
+  const fine = await handleRequest(post({ text: 'hello there friend' }, { 'X-Install-Id': 'good-install-1' }), e, { fetch: f, store: new Map() });
+  assert.equal(fine.status, 200);
+});
+
+test('optional rate-limit binding returns 429 when it says no, and is ignored when absent or broken', async () => {
+  const f = upstream(modelJson(goodModel));
+  const no = await handleRequest(post({ text: 'hello there friend' }), { ...env, RATE_LIMITER: { limit: async () => ({ success: false }) } }, { fetch: f, store: new Map() });
+  assert.equal(no.status, 429);
+  const broken = await handleRequest(post({ text: 'hello there friend' }), { ...env, RATE_LIMITER: { limit: async () => { throw new Error('x'); } } }, { fetch: f, store: new Map() });
+  assert.equal(broken.status, 200);
+});

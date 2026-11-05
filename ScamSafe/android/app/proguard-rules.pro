@@ -12,3 +12,10 @@
 -keep class com.facebook.react.turbomodule.** { *; }
 
 # Add any project specific keep options here:
+
+# ScamSafe native SMS module and Expo modules (reflection / JNI lookups)
+-keep class expo.modules.smsreader.** { *; }
+-keep class com.scamsafe.app.** { *; }
+-keep class expo.modules.** { *; }
+-keep class com.facebook.hermes.** { *; }
+-keep class com.facebook.jni.** { *; }
